@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laporan Uang Keluar — Angkringan AmanLahLek</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg-base: #120e0b;
+      --bg-card: #1d1713;
+      --bg-elevated: #261e19;
+      --border-warm: #382c24;
+      --gold: #d9a441;
+      --gold-soft: rgba(217, 164, 65, 0.14);
+      --cream: #f6ede2;
+      --muted: #b3a292;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-base);
+      color: var(--cream);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+    }
+    .card-warm {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-warm);
+    }
+    .card-elevated {
+      background-color: var(--bg-elevated);
+      border: 1px solid var(--border-warm);
+    }
+    .gold-gradient {
+      background: linear-gradient(135deg, #e2b04f 0%, #c68b2c 100%);
+    }
+    .tab-btn {
+      transition: all 0.18s ease;
+    }
+    .tab-btn.active {
+      background-color: var(--gold);
+      color: #16100b;
+      font-weight: 700;
+    }
+    .tab-btn:not(.active):hover {
+      background-color: rgba(217, 164, 65, 0.12);
+      color: #f6ede2;
+    }
+    .input-warm {
+      background-color: #15100d;
+      border: 1px solid #3f3128;
+      color: #f6ede2;
+    }
+    .input-warm:focus {
+      outline: none;
+      border-color: #d9a441;
+      box-shadow: 0 0 0 2px rgba(217, 164, 65, 0.22);
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #16110e;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3d3027;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #574437;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased">
+  <!-- Header -->
+  <header class="sticky top-0 z-30 border-b border-[#382c24] bg-[#120e0b]/95 backdrop-blur">
+    <div class="mx-auto max-w-7xl px-4 py-3 sm:px-6">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl gold-gradient text-[#16100b] font-extrabold text-lg shadow-md">
+            AL
+          </div>
+          <div class="min-w-0">
+            <h1 class="truncate text-base sm:text-lg font-bold tracking-tight text-[#f6ede2]">
+              Laporan Uang Keluar — Angkringan AmanLahLek
+            </h1>
+            <div class="flex flex-wrap items-center gap-2 text-xs text-[#b3a292]">
+              <span>Dicatat oleh: M.ABDUL YAHYA</span>
+              <span class="hidden sm:inline">•</span>
+              <button id="btn-status-pill" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-[#3f3128] bg-[#1d1713] px-2.5 py-0.5 text-[11px] font-medium text-[#e7d4bd] hover:border-[#d9a441] transition">
+                <span id="status-dot" class="h-2 w-2 rounded-full bg-amber-400"></span>
+                <span id="status-text">Mode Snapshot Sheet (154 data)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="btn-sync" type="button" class="inline-flex items-center gap-1.5 rounded-lg border border-[#3f3128] bg-[#1d1713] px-3 py-2 text-xs font-semibold text-[#f6ede2] hover:border-[#d9a441] hover:bg-[#261e19] transition">
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span>Sinkron</span>
+          </button>
+          <button id="btn-export-csv" type="button" class="inline-flex items-center gap-1.5 rounded-lg border border-[#3f3128] bg-[#1d1713] px-3 py-2 text-xs font-semibold text-[#f6ede2] hover:border-[#d9a441] hover:bg-[#261e19] transition">
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span>CSV</span>
+          </button>
+          <button id="btn-open-add" type="button" class="inline-flex items-center gap-1.5 rounded-lg gold-gradient px-3.5 py-2 text-xs font-bold text-[#16100b] shadow hover:brightness-105 transition">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            <span>Catat Pengeluaran</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="mt-3 flex items-center gap-1.5 overflow-x-auto pb-0.5" aria-label="Navigasi Utama">
+        <button data-tab="ringkasan" type="button" class="tab-btn active shrink-0 rounded-lg px-3.5 py-2 text-xs sm:text-sm">
+          Ringkasan &amp; Grafik
+        </button>
+        <button data-tab="transaksi" type="button" class="tab-btn shrink-0 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-[#cbb9a7]">
+          Data Pengeluaran (<span id="nav-count">154</span>)
+        </button>
+        <button data-tab="modal" type="button" class="tab-btn shrink-0 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-[#cbb9a7]">
+          Modal &amp; Patungan (3 Partner)
+        </button>
+        <button data-tab="koneksi" type="button" class="tab-btn shrink-0 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-[#cbb9a7]">
+          Koneksi GitHub &amp; Sheet
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-4 py-5 sm:px-6 space-y-5">
+    <!-- TAB 1: RINGKASAN & GRAFIK -->
+    <section id="tab-ringkasan" class="space-y-5">
+      <!-- 4 Main KPI Cards -->
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="card-warm rounded-2xl p-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-[#b3a292]">Total Pengeluaran</span>
+            <span class="rounded-full bg-rose-500/15 px-2 py-0.5 text-[11px] font-semibold text-rose-300" id="kpi-tx-badge">154 item</span>
+          </div>
+          <div class="mt-2 text-2xl font-extrabold tracking-tight text-[#f6ede2]" id="kpi-total-pengeluaran">Rp 25.647.700</div>
+          <p class="mt-1 text-xs text-[#a39180]">Rata-rata <span id="kpi-avg" class="text-[#e8d6c0] font-semibold">Rp 166.544</span> / item</p>
+        </div>
+
+        <div class="card-warm rounded-2xl p-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-[#b3a292]">Total Modal (3 Partner)</span>
+            <span class="rounded-full bg-[#d9a441]/15 px-2 py-0.5 text-[11px] font-semibold text-[#e5b85c]">Abdul • Ari • Usman</span>
+          </div>
+          <div class="mt-2 text-2xl font-extrabold tracking-tight text-[#f6ede2]" id="kpi-total-modal">Rp 29.700.000</div>
+          <p class="mt-1 text-xs text-[#a39180]">Terpakai <span id="kpi-pct-used" class="text-[#e8d6c0] font-semibold">86,4%</span> dari total modal</p>
+        </div>
+
+        <div class="card-warm rounded-2xl p-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-[#b3a292]">Sisa Kas / Modal</span>
+            <span id="kpi-sisa-badge" class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-300">Surplus</span>
+          </div>
+          <div class="mt-2 text-2xl font-extrabold tracking-tight text-emerald-300" id="kpi-sisa-modal">Rp 4.052.300</div>
+          <p class="mt-1 text-xs text-[#a39180]">Total Modal dikurangi Total Pengeluaran</p>
+        </div>
+
+        <div class="card-warm rounded-2xl p-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-[#b3a292]">Pengeluaran Bagi 3</span>
+            <span class="rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-300">Per Partner</span>
+          </div>
+          <div class="mt-2 text-2xl font-extrabold tracking-tight text-[#e5b85c]" id="kpi-bagi-3">Rp 8.549.233</div>
+          <p class="mt-1 text-xs text-[#a39180]">Beban patungan rata per orang</p>
+        </div>
+      </div>
+
+      <!-- Secondary Quick Metrics -->
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div class="card-elevated rounded-xl px-4 py-3 flex items-center justify-between">
+          <span class="text-xs text-[#b3a292]">Pengeluaran Bulan Ini</span>
+          <span class="text-sm font-bold text-[#f6ede2]" id="kpi-bulan-ini">Rp 25.448.700</span>
+        </div>
+        <div class="card-elevated rounded-xl px-4 py-3 flex items-center justify-between">
+          <span class="text-xs text-[#b3a292]">Pengeluaran Hari Ini</span>
+          <span class="text-sm font-bold text-[#f6ede2]" id="kpi-hari-ini">Rp 0</span>
+        </div>
+        <div class="card-elevated rounded-xl px-4 py-3 flex items-center justify-between">
+          <span class="text-xs text-[#b3a292]">Jumlah Toko / Pemasok</span>
+          <span class="text-sm font-bold text-[#e5b85c]" id="kpi-toko-count">23 pemasok</span>
+        </div>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div class="card-warm rounded-2xl p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <div>
+              <h2 class="text-sm font-bold text-[#f6ede2]">Komposisi Pengeluaran per Kategori</h2>
+              <p class="text-xs text-[#a39180]">Proporsi belanja bersih (tidak termasuk diskon negatif)</p>
+            </div>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chart-kategori"></canvas>
+          </div>
+        </div>
+
+        <div class="card-warm rounded-2xl p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <div>
+              <h2 class="text-sm font-bold text-[#f6ede2]">8 Toko / Pemasok Terbesar</h2>
+              <p class="text-xs text-[#a39180]">Total nilai belanja berdasarkan pemasok</p>
+            </div>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chart-toko"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Summary Table -->
+      <div class="card-warm rounded-2xl overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#382c24] px-4 py-3">
+          <div>
+            <h2 class="text-sm font-bold text-[#f6ede2]">Ringkasan per Kategori (Sesuai Kolom L:N Sheet)</h2>
+            <p class="text-xs text-[#a39180]">Klik kategori mana saja untuk langsung menyaring daftar transaksi</p>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-[#241c17] text-xs uppercase tracking-wider text-[#b3a292]">
+              <tr>
+                <th class="px-4 py-2.5">Kategori</th>
+                <th class="px-4 py-2.5 text-right">Jml Item</th>
+                <th class="px-4 py-2.5 text-right">Total (Rp)</th>
+                <th class="px-4 py-2.5 text-right">Porsi</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-ringkasan-kategori" class="divide-y divide-[#2e241d]"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: DATA PENGELUARAN (CRUD) -->
+    <section id="tab-transaksi" class="hidden space-y-4">
+      <div class="card-warm rounded-2xl p-4 space-y-3">
+        <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-12">
+          <div class="lg:col-span-4">
+            <label for="filter-search" class="sr-only">Cari barang atau toko</label>
+            <input id="filter-search" type="text" placeholder="Cari nama barang, toko, atau keterangan..." class="input-warm w-full rounded-xl px-3.5 py-2 text-sm" />
+          </div>
+          <div class="lg:col-span-3">
+            <label for="filter-kategori" class="sr-only">Filter Kategori</label>
+            <select id="filter-kategori" class="input-warm w-full rounded-xl px-3 py-2 text-sm">
+              <option value="ALL">Semua Kategori</option>
+            </select>
+          </div>
+          <div class="lg:col-span-3">
+            <label for="filter-toko" class="sr-only">Filter Toko</label>
+            <select id="filter-toko" class="input-warm w-full rounded-xl px-3 py-2 text-sm">
+              <option value="ALL">Semua Toko / Pemasok</option>
+            </select>
+          </div>
+          <div class="lg:col-span-2">
+            <label for="filter-sort" class="sr-only">Urutkan</label>
+            <select id="filter-sort" class="input-warm w-full rounded-xl px-3 py-2 text-sm">
+              <option value="no-desc">Terbaru (No ↓)</option>
+              <option value="no-asc">Terlama (No ↑)</option>
+              <option value="total-desc">Termahal</option>
+              <option value="total-asc">Termurah</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-[#b3a292]">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="filter-summary-text">Menampilkan 154 transaksi</span>
+            <span>•</span>
+            <span>Subtotal tampilan: <strong id="filter-subtotal" class="text-[#e5b85c]">Rp 25.647.700</strong></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-reset-filter" type="button" class="rounded-lg border border-[#3f3128] px-2.5 py-1 text-xs text-[#e7d4bd] hover:border-[#d9a441] transition">
+              Reset Filter
+            </button>
+            <select id="select-limit" class="input-warm rounded-lg px-2 py-1 text-xs">
+              <option value="30">30 baris</option>
+              <option value="60">60 baris</option>
+              <option value="ALL" selected>Semua</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions Table -->
+      <div class="card-warm rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs sm:text-sm">
+            <thead class="bg-[#241c17] text-[11px] uppercase tracking-wider text-[#b3a292]">
+              <tr>
+                <th class="px-3 py-3 w-12">No</th>
+                <th class="px-3 py-3 whitespace-nowrap">Tanggal</th>
+                <th class="px-3 py-3">Nama Barang</th>
+                <th class="px-3 py-3">Kategori</th>
+                <th class="px-3 py-3 text-right whitespace-nowrap">Qty</th>
+                <th class="px-3 py-3 text-right whitespace-nowrap">Harga Satuan</th>
+                <th class="px-3 py-3 text-right whitespace-nowrap">Total (Rp)</th>
+                <th class="px-3 py-3">Toko / Pemasok</th>
+                <th class="px-3 py-3 text-center whitespace-nowrap">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-transaksi" class="divide-y divide-[#2c221b]"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: MODAL & PATUNGAN (3 PARTNER) -->
+    <section id="tab-modal" class="hidden space-y-5">
+      <div class="card-warm rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base font-bold text-[#f6ede2]">Perhitungan Modal &amp; Patungan 3 Partner</h2>
+          <p class="mt-0.5 text-xs text-[#a39180]">
+            Menyamakan rumus Google Sheet kolom O–X: setiap partner menanggung 1/3 dari total pengeluaran (<span id="modal-bagi3-inline" class="font-semibold text-[#e5b85c]">Rp 8.549.233</span>).
+          </p>
+        </div>
+        <button id="btn-open-modal-edit" type="button" class="inline-flex items-center gap-1.5 rounded-xl gold-gradient px-4 py-2 text-xs font-bold text-[#16100b] shadow hover:brightness-105 transition">
+          Edit Setoran Modal
+        </button>
+      </div>
+
+      <!-- 3 Partner Cards -->
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-3" id="partner-cards-grid"></div>
+
+      <!-- Utilization Progress -->
+      <div class="card-warm rounded-2xl p-5 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
+          <span class="font-semibold text-[#f6ede2]">Serapan Total Modal Usaha</span>
+          <span id="modal-progress-label" class="font-bold text-[#e5b85c]">Rp 25.647.700 / Rp 29.700.000 (86,4%)</span>
+        </div>
+        <div class="h-3.5 w-full overflow-hidden rounded-full bg-[#15100d] border border-[#382c24]">
+          <div id="modal-progress-bar" class="h-full rounded-full gold-gradient transition-all duration-300" style="width: 86.4%"></div>
+        </div>
+        <div class="flex flex-wrap justify-between gap-2 text-xs text-[#a39180]">
+          <span>Sisa kas bersama: <strong id="modal-sisa-footer" class="text-emerald-300">Rp 4.052.300</strong></span>
+          <span>Sel O6 (Abdul), O9 (Ari), O12 (Usman) di Google Sheet</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: KONEKSI GITHUB & GOOGLE SHEET -->
+    <section id="tab-koneksi" class="hidden space-y-5">
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <!-- Connection Config Card -->
+        <div class="card-warm rounded-2xl p-5 space-y-4">
+          <div>
+            <h2 class="text-base font-bold text-[#f6ede2]">Hubungkan ke Google Sheet (Apps Script API)</h2>
+            <p class="mt-1 text-xs text-[#b3a292]">
+              Tempel URL Web App dari Google Apps Script agar setiap transaksi tambah, edit, hapus, dan update modal langsung tersimpan ke Google Sheet secara real-time.
+            </p>
+          </div>
+
+          <div class="space-y-2">
+            <label for="input-api-url" class="block text-xs font-semibold text-[#e7d4bd]">URL Web App Google Apps Script (.../exec)</label>
+            <input id="input-api-url" type="url" placeholder="https://script.google.com/macros/s/.../exec" class="input-warm w-full rounded-xl px-3.5 py-2.5 text-xs sm:text-sm" />
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button id="btn-save-api" type="button" class="rounded-xl gold-gradient px-4 py-2 text-xs font-bold text-[#16100b] hover:brightness-105 transition">
+              Simpan &amp; Uji Koneksi
+            </button>
+            <button id="btn-clear-api" type="button" class="rounded-xl border border-[#3f3128] bg-[#15100d] px-3.5 py-2 text-xs font-semibold text-[#e7d4bd] hover:border-rose-400 transition">
+              Putuskan &amp; Pakai Snapshot
+            </button>
+          </div>
+
+          <div id="api-test-result" class="hidden rounded-xl border px-3.5 py-2.5 text-xs"></div>
+
+          <div class="border-t border-[#382c24] pt-4 space-y-2 text-xs text-[#b3a292]">
+            <div class="font-semibold text-[#f6ede2]">Tautan Proyek Anda:</div>
+            <div class="flex flex-wrap gap-2">
+              <a href="https://docs.google.com/spreadsheets/d/19qe8npxShsU0L8s8XfgvyYTzHgzz6EJweAsIKV0O8RE/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-lg border border-[#3f3128] bg-[#15100d] px-3 py-1.5 text-xs font-medium text-[#e5b85c] hover:border-[#d9a441] transition">
+                Buka Google Sheet
+              </a>
+              <a href="https://github.com/newsistim/Laporan-Uang-Keluar" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-lg border border-[#3f3128] bg-[#15100d] px-3 py-1.5 text-xs font-medium text-[#e5b85c] hover:border-[#d9a441] transition">
+                Buka Repo GitHub
+              </a>
+              <a href="https://newsistim.github.io/Laporan-Uang-Keluar/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-lg border border-[#3f3128] bg-[#15100d] px-3 py-1.5 text-xs font-medium text-[#e5b85c] hover:border-[#d9a441] transition">
+                URL GitHub Pages
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step-by-step Deploy Guide -->
+        <div class="card-warm rounded-2xl p-5 space-y-3">
+          <h2 class="text-base font-bold text-[#f6ede2]">Langkah Deploy ke GitHub Pages</h2>
+          <ol class="list-decimal list-inside space-y-2 text-xs sm:text-sm text-[#d6c5b3] leading-relaxed">
+            <li>Buka Google Sheet Anda → klik <strong>Extensions (Ekstensi)</strong> → <strong>Apps Script</strong>.</li>
+            <li>Salin kode <strong>Apps Script</strong> di bawah, tempel di editor, lalu klik <strong>Deploy → New deployment → Web app</strong> (Execute as: <em>Me</em>, Who has access: <em>Anyone</em>).</li>
+            <li>Salin URL Web App (<code class="text-[#e5b85c]">.../exec</code>) lalu tempel di kolom sebelah kiri (atau isi langsung di variabel <code class="text-[#e5b85c]">DEFAULT_API_URL</code> dalam <code class="text-[#e5b85c]">index.html</code>).</li>
+            <li>Upload <code class="text-[#e5b85c]">index.html</code> ke repositori <code class="text-[#e5b85c]">newsistim/Laporan-Uang-Keluar</code> (branch <code class="text-[#e5b85c]">main</code>).</li>
+            <li>Di GitHub buka <strong>Settings → Pages</strong> → pilih branch <code class="text-[#e5b85c]">main</code> / <code class="text-[#e5b85c]">/ (root)</code> → klik <strong>Save</strong>.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Copyable Apps Script Code -->
+      <div class="card-warm rounded-2xl overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#382c24] px-4 py-3">
+          <div>
+            <h3 class="text-sm font-bold text-[#f6ede2]">Kode Backend Google Apps Script (Apps-Script-Code.gs)</h3>
+            <p class="text-xs text-[#a39180]">Aman untuk tabel ringkasan L4:X23 — tidak menggeser rumus modal saat hapus baris</p>
+          </div>
+          <button id="btn-copy-gas" type="button" class="rounded-lg gold-gradient px-3.5 py-1.5 text-xs font-bold text-[#16100b] hover:brightness-105 transition">
+            Salin Kode Apps Script
+          </button>
+        </div>
+        <pre id="gas-code-preview" class="max-h-80 overflow-auto bg-[#100c09] p-4 text-[11px] leading-relaxed text-[#dfd0bf] font-mono"></pre>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: TAMBAH / EDIT PENGELUARAN -->
+  <div id="modal-tx" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+    <div class="card-warm w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between border-b border-[#382c24] px-5 py-3.5">
+        <h3 id="modal-tx-title" class="text-base font-bold text-[#f6ede2]">Catat Pengeluaran Baru</h3>
+        <button id="btn-close-tx" type="button" class="rounded-lg p-1 text-[#b3a292] hover:bg-[#2b221c] hover:text-white">✕</button>
+      </div>
+      <form id="form-tx" class="p-5 space-y-3.5">
+        <input type="hidden" id="tx-edit-row" value="" />
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label for="tx-tanggal" class="mb-1 block text-xs font-semibold text-[#d6c5b3]">Tanggal</label>
+            <input id="tx-tanggal" type="date" required class="input-warm w-full rounded-xl px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label for="tx-kategori" class="mb-1 block text-xs font-semibold text-[#d6c5b3]">Kategori</label>
+            <select id="tx-kategori" required class="input-warm w-full rounded-xl px-3 py-2 text-sm"></select>
+          </div>
+        </div>
+
+        <div>
+          <label for="tx-nama" class="mb-1 block text-xs font-semibold text-[#d6c5b3]">Nama Barang / Pengeluaran</label>
+          <input id="tx-nama" type="text" required placeholder="Contoh: Es Batu Cristal, Sewa Lapak, Cup Plastik..." class="input-warm w-full rounded-xl px-3 py-2 text-sm" />
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label for="tx-jumlah" class="mb-1 block text-xs font-semibold text-[#d6c5b3]">Jumlah</label>
+            <input id="tx-jumlah" type="number" step="any" min="0.01" value="1" required class="input-warm w-full rounded-xl px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label for="tx-satuan" class="mb-1 block text-xs font-semibold text-[#d6c5b3]">Satuan</label>
+            <input id="tx-satuan" type="text" value="1" placeholder="pcs / kg / 1" class="input-warm w-full rounded-xl px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label for="tx-harga" class="mb-1 block text-xs font-semibold text-[#d6c5b3]">Harga Satuan (Rp)</label>
+            <input id="tx-harga" type="number" step="any" required placeholder="0" class="input-warm w-full rounded-xl px-3 py-2 text-sm" />
+          </div>
+        </div>
+
+        <div class="rounded-xl border border-[#3f3128] bg-[#15100d] px-3.5 py-2.5 flex items-center justify-between">
+          <span class="text-xs text-[#b3a292]">Perkiraan Total (Jumlah × Harga Satuan)</span>
+          <span id="tx-total-preview" class="text-sm font-extrabold text-[#e5b85c]">Rp 0</span>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label for="tx-toko" class="mb-1 block text-xs font-semibold text-[#d6c5b3]">Toko / Pemasok</label>
+            <input id="tx-toko" type="text" list="datalist-toko" placeholder="Contoh: BALIKADO, PAJAK NIBUNG..." class="input-warm w-full rounded-xl px-3 py-2 text-sm" />
+            <datalist id="datalist-toko"></datalist>
+          </div>
+          <div>
+            <label for="tx-keterangan" class="mb-1 block text-xs font-semibold text-[#d6c5b3]">Keterangan (Opsional)</label>
+            <input id="tx-keterangan" type="text" placeholder="Catatan tambahan..." class="input-warm w-full rounded-xl px-3 py-2 text-sm" />
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button id="btn-cancel-tx" type="button" class="rounded-xl border border-[#3f3128] px-4 py-2 text-xs font-semibold text-[#d6c5b3] hover:bg-[#261e19]">
+            Batal
+          </button>
+          <button id="btn-submit-tx" type="submit" class="rounded-xl gold-gradient px-5 py-2 text-xs font-bold text-[#16100b] hover:brightness-105">
+            Simpan Pengeluaran
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: KONFIRMASI HAPUS -->
+  <div id="modal-delete" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+    <div class="card-warm w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
+      <div>
+        <h3 class="text-base font-bold text-[#f6ede2]">Hapus Data Pengeluaran?</h3>
+        <p id="delete-desc" class="mt-1.5 text-xs text-[#b3a292] leading-relaxed"></p>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button id="btn-cancel-delete" type="button" class="rounded-xl border border-[#3f3128] px-4 py-2 text-xs font-semibold text-[#d6c5b3] hover:bg-[#261e19]">
+          Batal
+        </button>
+        <button id="btn-confirm-delete" type="button" class="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white hover:bg-rose-500">
+          Ya, Hapus
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT MODAL PARTNER -->
+  <div id="modal-partner" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+    <div class="card-warm w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between border-b border-[#382c24] px-5 py-3.5">
+        <h3 class="text-base font-bold text-[#f6ede2]">Edit Setoran Modal Partner</h3>
+        <button id="btn-close-partner" type="button" class="rounded-lg p-1 text-[#b3a292] hover:bg-[#2b221c] hover:text-white">✕</button>
+      </div>
+      <form id="form-partner" class="p-5 space-y-3.5">
+        <div>
+          <label for="input-modal-abdul" class="mb-1 block text-xs font-semibold text-[#d6c5b3]">Modal Abdul (Sel O6)</label>
+          <input id="input-modal-abdul" type="number" min="0" required class="input-warm w-full rounded-xl px-3.5 py-2 text-sm" />
+        </div>
+        <div>
+          <label for="input-modal-ari" class="mb-1 block text-xs font-semibold text-[#d6c5b3]">Modal Ari (Sel O9)</label>
+          <input id="input-modal-ari" type="number" min="0" required class="input-warm w-full rounded-xl px-3.5 py-2 text-sm" />
+        </div>
+        <div>
+          <label for="input-modal-usman" class="mb-1 block text-xs font-semibold text-[#d6c5b3]">Modal Usman (Sel O12)</label>
+          <input id="input-modal-usman" type="number" min="0" required class="input-warm w-full rounded-xl px-3.5 py-2 text-sm" />
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button id="btn-cancel-partner" type="button" class="rounded-xl border border-[#3f3128] px-4 py-2 text-xs font-semibold text-[#d6c5b3] hover:bg-[#261e19]">
+            Batal
+          </button>
+          <button type="submit" class="rounded-xl gold-gradient px-5 py-2 text-xs font-bold text-[#16100b] hover:brightness-105">
+            Simpan Modal
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="pointer-events-none fixed bottom-5 right-5 z-50 hidden max-w-sm rounded-xl border border-[#d9a441]/50 bg-[#1f1813] px-4 py-3 text-xs font-medium text-[#f6ede2] shadow-2xl"></div>
+
+  <script>
+    // =========================================================================
+    // KONFIGURASI API GOOGLE APPS SCRIPT
+    // Tempel URL Web App (.../exec) Anda di sini sebelum upload ke GitHub Pages
+    // =========================================================================
+    const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbwDh_8vjYm-CObDjYt8nIM0e9Tt4pZyC9jv91A5AxbAfpatU1iF51ILcYLz5aCtGl_e/exec";
+    const STORAGE_KEY_API = "amanlahlek_pengeluaran_api_url";
+
+    const OFFICIAL_CATEGORIES = [
+      "Peralatan",
+      "SEWA LAPAK",
+      "POWDER",
+      "LAIN-LAIN",
+      "BAHAN BAKU MAKANAN",
+      "BAHAN BAKU MINUMAN",
+      "SIMPLE SIRUP",
+      "DISKON"
+    ];
+
+    const CATEGORY_COLORS = {
+      "Peralatan": "#d9a441",
+      "SEWA LAPAK": "#e07a5f",
+      "POWDER": "#81b29a",
+      "LAIN-LAIN": "#a882dd",
+      "BAHAN BAKU MAKANAN": "#f2cc8f",
+      "BAHAN BAKU MINUMAN": "#4ea8de",
+      "SIMPLE SIRUP": "#f4978e",
+      "DISKON": "#6c757d"
+    };
+
+    const INITIAL_MODAL = {
+      abdul: 13200000,
+      ari: 10000000,
+      usman: 6500000
+    };
+
+    const INITIAL_TRANSACTIONS = [{"row": 5, "no": 1, "tanggal": "2026-11-09", "nama": "MESIN KOPI", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 12700000.0, "total": 12700000, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": false}, {"row": 6, "no": 2, "tanggal": "2026-11-09", "nama": "GRINDER KOPI", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 7, "no": 3, "tanggal": "2026-11-09", "nama": "GELAS KOPI", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "2", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 8, "no": 4, "tanggal": "2026-11-09", "nama": "TOPLES", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "5", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 9, "no": 5, "tanggal": "2026-11-09", "nama": "BANGKU PORTABLE BESAR", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "10", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 10, "no": 6, "tanggal": "2026-11-09", "nama": "BANGKU PORTABLE KECIL", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "10", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 11, "no": 7, "tanggal": "2026-11-09", "nama": "MEJA PLASTIK", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "10", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 12, "no": 8, "tanggal": "2026-11-09", "nama": "KUALI", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 13, "no": 9, "tanggal": "2026-11-09", "nama": "SPATULA", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 14, "no": 10, "tanggal": "2026-11-09", "nama": "PENYARING MIE", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 15, "no": 11, "tanggal": "2026-11-09", "nama": "SENDOK PENGADUK KOPI", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 16, "no": 12, "tanggal": "2026-11-09", "nama": "MINI MIXER", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 17, "no": 13, "tanggal": "2026-11-09", "nama": "PANCI", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 18, "no": 14, "tanggal": "2026-11-09", "nama": "STOPKONTAK 3 LOBANG", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 19, "no": 15, "tanggal": "2026-11-09", "nama": "STOPKONTAK 1 LOBANG", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 20, "no": 16, "tanggal": "2026-11-09", "nama": "PITING LAMPU 10 METER", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "2", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 21, "no": 17, "tanggal": "2026-11-09", "nama": "SHAKER ALUMUNIUM", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 22, "no": 18, "tanggal": "2026-11-09", "nama": "BUBUK POWEDER RASA", "kategori": "POWDER", "jumlah": 1.0, "satuan": "6", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 23, "no": 19, "tanggal": "2026-11-09", "nama": "MANGKOK STAINLES", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 24, "no": 20, "tanggal": "2026-11-09", "nama": "SIMPLE SIRUP", "kategori": "SIMPLE SIRUP", "jumlah": 1.0, "satuan": "2", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 25, "no": 21, "tanggal": "2026-11-09", "nama": "MADU MURNI", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 26, "no": 22, "tanggal": "2026-11-09", "nama": "CUP MINUM PLASTIK ICE", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 27, "no": 23, "tanggal": "2026-11-09", "nama": "SEDOTAN ICE", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 28, "no": 24, "tanggal": "2026-11-09", "nama": "SEDOTAN HOT", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 29, "no": 25, "tanggal": "2026-11-09", "nama": "CUP MAKANAN", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 30, "no": 26, "tanggal": "2026-11-09", "nama": "SENDOK GARPU", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 31, "no": 27, "tanggal": "2026-11-09", "nama": "CUP MINUM KERTAS HOT", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 32, "no": 28, "tanggal": "2026-11-09", "nama": "TOPLES PENYIMPANAN KOPI", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 33, "no": 29, "tanggal": "2026-11-09", "nama": "GEROBAK MINUMAN", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 34, "no": 30, "tanggal": "2026-11-09", "nama": "GEROBAK MAKANAN", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 35, "no": 31, "tanggal": "2026-11-09", "nama": "BOTOL SAOS PLASTIK", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "3", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 36, "no": 32, "tanggal": "2026-11-09", "nama": "TIMBANGAN DIGITAL", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 37, "no": 33, "tanggal": "2026-11-09", "nama": "STAINLESS MILK", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 38, "no": 34, "tanggal": "2026-11-09", "nama": "KUAS MINI", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "2", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 39, "no": 35, "tanggal": "2026-11-09", "nama": "KAIN LAP", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "3", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 40, "no": 36, "tanggal": "2026-11-09", "nama": "BEANS ARABIKA", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "Ambil Take Over", "keterangan": "Punya Orang Gg.Rukun Denai", "isBundleChild": true}, {"row": 41, "no": 37, "tanggal": "2026-11-09", "nama": "UANG PICKUP KE PAKAM", "kategori": "Lain-lain", "jumlah": 1.0, "satuan": "1", "harga": 250000.0, "total": 250000, "toko": "INDRIVER", "keterangan": "", "isBundleChild": false}, {"row": 42, "no": 38, "tanggal": "2026-11-18", "nama": "PANJAR UANG LAPAK", "kategori": "SEWA LAPAK", "jumlah": 1.0, "satuan": "1", "harga": 500000.0, "total": 500000, "toko": "LAPAK NIBUNG", "keterangan": "ATAS NAMA APEK PENERIMA", "isBundleChild": false}, {"row": 43, "no": 39, "tanggal": "2026-11-19", "nama": "PENIYMPANAN BOX", "kategori": "Peralatan", "jumlah": 2.0, "satuan": "2", "harga": 118000.0, "total": 236000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 44, "no": 40, "tanggal": "2026-11-19", "nama": "BANGKU PLASTIK", "kategori": "Peralatan", "jumlah": 2.0, "satuan": "2", "harga": 23000.0, "total": 46000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 45, "no": 41, "tanggal": "2026-11-19", "nama": "AQUA GALON", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 40000.0, "total": 40000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 46, "no": 42, "tanggal": "2026-11-19", "nama": "TEKO LISTRIK", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 236000.0, "total": 236000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 47, "no": 43, "tanggal": "2026-11-19", "nama": "MAMA LEMON", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 11500.0, "total": 11500, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 48, "no": 44, "tanggal": "2026-11-19", "nama": "SPONS CUCI PIRING", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 7000.0, "total": 7000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 49, "no": 45, "tanggal": "2026-11-19", "nama": "POMPA AIR PORTABLE", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 67000.0, "total": 67000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 50, "no": 46, "tanggal": "2026-11-19", "nama": "MILK JUG", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 141500.0, "total": 141500, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 51, "no": 47, "tanggal": "2026-11-19", "nama": "TOPLES PLASTIK 100 ML", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 7500.0, "total": 7500, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 52, "no": 48, "tanggal": "2026-11-19", "nama": "TOPLES PLASTIK 800 ML", "kategori": "Peralatan", "jumlah": 4.0, "satuan": "1", "harga": 6500.0, "total": 26000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 53, "no": 49, "tanggal": "2026-11-19", "nama": "KANEBO", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 17500.0, "total": 17500, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 54, "no": 50, "tanggal": "2026-11-19", "nama": "BOTOL KECAP 1000 ML", "kategori": "Peralatan", "jumlah": 2.0, "satuan": "1", "harga": 8500.0, "total": 17000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 55, "no": 51, "tanggal": "2026-11-19", "nama": "BOTOL SAUS 700 ML", "kategori": "Peralatan", "jumlah": 3.0, "satuan": "1", "harga": 8500.0, "total": 25500, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 56, "no": 52, "tanggal": "2026-11-19", "nama": "TALENAN", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 49000.0, "total": 49000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 57, "no": 53, "tanggal": "2026-11-19", "nama": "PARUTAN SERBAGUNA", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 10000.0, "total": 10000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 58, "no": 54, "tanggal": "2026-11-19", "nama": "COOKMASTER JIGGER", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 35000.0, "total": 35000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 59, "no": 55, "tanggal": "2026-11-19", "nama": "MINUMAN AQUA", "kategori": "Peralatan", "jumlah": 2.0, "satuan": "1", "harga": 3000.0, "total": 6000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 60, "no": 56, "tanggal": "2026-11-19", "nama": "GELAS BENING PLASTIK", "kategori": "Peralatan", "jumlah": 2.0, "satuan": "1", "harga": 12500.0, "total": 25000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 61, "no": 57, "tanggal": "2026-11-19", "nama": "SERBET", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 5000.0, "total": 5000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 62, "no": 58, "tanggal": "2026-11-19", "nama": "KUAS SILICON", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 13000.0, "total": 13000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 63, "no": 59, "tanggal": "2026-11-19", "nama": "GUNTING", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 13000.0, "total": 13000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 64, "no": 60, "tanggal": "2026-11-19", "nama": "PISAU CUTTER", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 2500.0, "total": 2500, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 65, "no": 61, "tanggal": "2026-11-19", "nama": "PIBALL COKLAT", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 15000.0, "total": 15000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 66, "no": 62, "tanggal": "2026-11-19", "nama": "RODA GEPENG HITAM", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 11000.0, "total": 11000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 67, "no": 63, "tanggal": "2026-11-19", "nama": "JEPITAN KUE", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 10000.0, "total": 10000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 68, "no": 64, "tanggal": "2026-11-19", "nama": "GARPU", "kategori": "Peralatan", "jumlah": 2.0, "satuan": "1", "harga": 8000.0, "total": 16000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 69, "no": 65, "tanggal": "2026-11-19", "nama": "PIRING ROTAN PLASTIK", "kategori": "Peralatan", "jumlah": 10.0, "satuan": "1", "harga": 4000.0, "total": 40000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 70, "no": 66, "tanggal": "2026-11-19", "nama": "KOMPOR GASS", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 321500.0, "total": 321500, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 71, "no": 67, "tanggal": "2026-11-19", "nama": "SCOOP ICE CREAM", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 28500.0, "total": 28500, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 72, "no": 68, "tanggal": "2026-11-19", "nama": "TAMBAHAN UANG PANJAR LAPAK", "kategori": "SEWA LAPAK", "jumlah": 1.0, "satuan": "1", "harga": 200000.0, "total": 200000, "toko": "LAPAK NIBUNG", "keterangan": "UANG CASH KASIH KASIH DI LAPAK TEGUH", "isBundleChild": false}, {"row": 73, "no": 69, "tanggal": "2026-11-20", "nama": "TENDA MATIC", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 2700000.0, "total": 2700000, "toko": "Kenalan Teguh", "keterangan": "Ngambilnya di Halat", "isBundleChild": false}, {"row": 74, "no": 70, "tanggal": "2026-11-20", "nama": "DAVINCI CARAMEL 750 ML", "kategori": "SIMPLE SIRUP", "jumlah": 1.0, "satuan": "1", "harga": 135000.0, "total": 135000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 75, "no": 71, "tanggal": "2026-11-20", "nama": "DAVINCI BLUE OCEAN 750 ML", "kategori": "SIMPLE SIRUP", "jumlah": 1.0, "satuan": "1", "harga": 135000.0, "total": 135000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 76, "no": 72, "tanggal": "2026-11-20", "nama": "CUP HOLDER 2 SLOT", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 87700.0, "total": 87700, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 77, "no": 73, "tanggal": "2026-11-20", "nama": "JUNGLE JUICE ORANGE 1 LITER", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 32000.0, "total": 32000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 78, "no": 74, "tanggal": "2026-11-20", "nama": "THECOFF TAMPER KOPI SPRING RIPPLE 51MM", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 190000.0, "total": 190000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 79, "no": 75, "tanggal": "2026-11-20", "nama": "MAXCREAMER REFILL", "kategori": "Peralatan", "jumlah": 2.0, "satuan": "1", "harga": 48000.0, "total": 96000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 80, "no": 76, "tanggal": "2026-11-20", "nama": "SCALE DIGIPOUNDS TOMBOL", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 130000.0, "total": 130000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 81, "no": 77, "tanggal": "2026-11-20", "nama": "BBQ MATCHA", "kategori": "POWDER", "jumlah": 1.0, "satuan": "1", "harga": 65000.0, "total": 65000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 82, "no": 78, "tanggal": "2026-11-20", "nama": "BAR MATT 45×30X1CM", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 63000.0, "total": 63000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 83, "no": 79, "tanggal": "2026-11-20", "nama": "GELAS TAKAR 2L LIST HITAM", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 48000.0, "total": 48000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 84, "no": 80, "tanggal": "2026-11-20", "nama": "BBQ THAI TEA", "kategori": "POWDER", "jumlah": 1.0, "satuan": "1", "harga": 65000.0, "total": 65000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 85, "no": 81, "tanggal": "2026-11-20", "nama": "SKM OMELA 480GR", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 4.0, "satuan": "1", "harga": 17000.0, "total": 68000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 86, "no": 82, "tanggal": "2026-11-20", "nama": "GULARE PALM SUGAR 1.3KG", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": 72000.0, "total": 72000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 87, "no": 83, "tanggal": "2026-11-20", "nama": "PLASTIK C1B", "kategori": "Peralatan", "jumlah": 4.0, "satuan": "1", "harga": 16000.0, "total": 64000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 88, "no": 84, "tanggal": "2026-11-20", "nama": "SAMPAH 60X100", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 24000.0, "total": 24000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 89, "no": 85, "tanggal": "2026-11-20", "nama": "IZY SEA SALT", "kategori": "POWDER", "jumlah": 1.0, "satuan": "1", "harga": 111000.0, "total": 111000, "toko": "BREWTOPIA SEKIP", "keterangan": "", "isBundleChild": false}, {"row": 90, "no": 86, "tanggal": "2026-11-20", "nama": "LAMPU 20 BIJI", "kategori": "Peralatan", "jumlah": 20.0, "satuan": "1", "harga": 26700.0, "total": 534000, "toko": "Panglong", "keterangan": "", "isBundleChild": false}, {"row": 91, "no": 87, "tanggal": "2026-11-20", "nama": "KABEL15 M", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 11000.0, "total": 11000, "toko": "Panglong", "keterangan": "", "isBundleChild": false}, {"row": 92, "no": 88, "tanggal": "2026-11-20", "nama": "STOP KONTAK", "kategori": "Peralatan", "jumlah": 2.0, "satuan": "1", "harga": 37500.0, "total": 75000, "toko": "Panglong", "keterangan": "", "isBundleChild": false}, {"row": 93, "no": 89, "tanggal": "2026-11-20", "nama": "TABUNG GAS", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 200000.0, "total": 200000, "toko": "Panglong", "keterangan": "", "isBundleChild": false}, {"row": 94, "no": 90, "tanggal": "2026-11-20", "nama": "TAMBAHAN UANG PANJAR LAPAK", "kategori": "SEWA LAPAK", "jumlah": 1.0, "satuan": "1", "harga": 1000000.0, "total": 1000000, "toko": "LAPAK NIBUNG", "keterangan": "ATAS NAMA APEK PENERIMA", "isBundleChild": false}, {"row": 95, "no": 91, "tanggal": "2026-11-21", "nama": "2BLIBIS SAUS CABESKG", "kategori": "BAHAN BAKU MAKANAN", "jumlah": 1.0, "satuan": "1", "harga": 185000.0, "total": 185000, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 96, "no": 92, "tanggal": "2026-11-21", "nama": "CHTATO LITE NORI 115", "kategori": "LAIN-LAIN", "jumlah": 1.0, "satuan": "1", "harga": 17400.0, "total": 17400, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 97, "no": 93, "tanggal": "2026-11-21", "nama": "BENDERA TEM SBK 50GR", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 10.0, "satuan": "1", "harga": 3600.0, "total": 36000, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 98, "no": 94, "tanggal": "2026-11-21", "nama": "TROPICAL MNYX BTL1,5", "kategori": "BAHAN BAKU MAKANAN", "jumlah": 2.0, "satuan": "1", "harga": 34300.0, "total": 68600, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 99, "no": 95, "tanggal": "2026-11-21", "nama": "VORN XMART SS STR11D", "kategori": "BAHAN BAKU MAKANAN", "jumlah": 2.0, "satuan": "1", "harga": 3000.0, "total": 6000, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 100, "no": 96, "tanggal": "2026-11-21", "nama": "BANGO KDP MNS 1500G", "kategori": "BAHAN BAKU MAKANAN", "jumlah": 1.0, "satuan": "1", "harga": 48900.0, "total": 48900, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 101, "no": 97, "tanggal": "2026-11-21", "nama": "LRST GULA KRSTL 1 KG", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 2.0, "satuan": "1", "harga": 17500.0, "total": 35000, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 102, "no": 98, "tanggal": "2026-11-21", "nama": "ABC SUPER/PUR AAR/45", "kategori": "Peralatan", "jumlah": 2.0, "satuan": "1", "harga": 14000.0, "total": 28000, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 103, "no": 99, "tanggal": "2026-11-21", "nama": "JOLLY TISU POPTOK9OG", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 27500.0, "total": 27500, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 104, "no": 100, "tanggal": "2026-11-21", "nama": "JERUK SUNKISS", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": 26789.0, "total": 26789, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 105, "no": 101, "tanggal": "2026-11-21", "nama": "SPRITE PET 250HL", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": 34300.0, "total": 34300, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 106, "no": 102, "tanggal": "2026-11-21", "nama": "OREO MINI VANLA 56,4", "kategori": "LAIN-LAIN", "jumlah": 1.0, "satuan": "1", "harga": 8100.0, "total": 8100, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 107, "no": 103, "tanggal": "2026-11-21", "nama": "ROMA GNOH SAND. 10BG", "kategori": "LAIN-LAIN", "jumlah": 1.0, "satuan": "1", "harga": 8400.0, "total": 8400, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 108, "no": 104, "tanggal": "2026-11-21", "nama": "SLAI D'LAI BISKUIT32", "kategori": "LAIN-LAIN", "jumlah": 1.0, "satuan": "1", "harga": 2000.0, "total": 2000, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 109, "no": 105, "tanggal": "2026-11-21", "nama": "HL.PANDA CHOCOLATE25", "kategori": "LAIN-LAIN", "jumlah": 1.0, "satuan": "1", "harga": 10500.0, "total": 10500, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 110, "no": 106, "tanggal": "2026-11-21", "nama": "OW/D CRUNC VNLA 65", "kategori": "LAIN-LAIN", "jumlah": 3.0, "satuan": "1", "harga": 3000.0, "total": 9000, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 111, "no": 107, "tanggal": "2026-11-21", "nama": "YXKULT FRMNTASI 505", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": 11700.0, "total": 11700, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 112, "no": 108, "tanggal": "2026-11-21", "nama": "AQUA BOTOL MIN 600 ML", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": 46500.0, "total": 46500, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 113, "no": 109, "tanggal": "2026-11-21", "nama": "INDOMIE GORENG SPC B0 G", "kategori": "BAHAN BAKU MAKANAN", "jumlah": 1.0, "satuan": "1", "harga": 120500.0, "total": 120500, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 114, "no": 110, "tanggal": "2026-11-21", "nama": "INDOMIE KARI AYAM KUAH T2 G", "kategori": "BAHAN BAKU MAKANAN", "jumlah": 1.0, "satuan": "1", "harga": 120500.0, "total": 120500, "toko": "IndoGrosirMedan", "keterangan": "", "isBundleChild": false}, {"row": 115, "no": 111, "tanggal": "2026-11-21", "nama": "DISKON INDOGROSIR", "kategori": "DISKON", "jumlah": 1.0, "satuan": "1", "harga": -37689.0, "total": -37689, "toko": "IndoGrosirMedan", "keterangan": "DISKON", "isBundleChild": false}, {"row": 116, "no": 112, "tanggal": "2026-11-21", "nama": "POWDER TARO", "kategori": "POWDER", "jumlah": 1.0, "satuan": "1", "harga": 165000.0, "total": 165000, "toko": "NGAMBIL DARI TEGUH", "keterangan": "", "isBundleChild": false}, {"row": 117, "no": 113, "tanggal": "2026-11-21", "nama": "POWDER COKLAT", "kategori": "POWDER", "jumlah": 1.0, "satuan": "1", "harga": 165000.0, "total": 165000, "toko": "NGAMBIL DARI TEGUH", "keterangan": "", "isBundleChild": false}, {"row": 118, "no": 114, "tanggal": "2026-11-21", "nama": "POWDER MATCHA", "kategori": "POWDER", "jumlah": 1.0, "satuan": "1", "harga": 265000.0, "total": 265000, "toko": "NGAMBIL DARI TEGUH", "keterangan": "", "isBundleChild": false}, {"row": 119, "no": 115, "tanggal": "2026-11-21", "nama": "POWDER REDVELVET", "kategori": "POWDER", "jumlah": 1.0, "satuan": "1", "harga": 185000.0, "total": 185000, "toko": "NGAMBIL DARI TEGUH", "keterangan": "", "isBundleChild": false}, {"row": 120, "no": 116, "tanggal": "2026-11-21", "nama": "POWDER STRAWBERRY", "kategori": "POWDER", "jumlah": 1.0, "satuan": "1", "harga": 115000.0, "total": 115000, "toko": "NGAMBIL DARI TEGUH", "keterangan": "", "isBundleChild": false}, {"row": 121, "no": 117, "tanggal": "2026-11-21", "nama": "TAMBAHAN UANG PANJAR LAPAK", "kategori": "SEWA LAPAK", "jumlah": 1.0, "satuan": "1", "harga": 100000.0, "total": 100000, "toko": "LAPAK NIBUNG", "keterangan": "ATAS NAMA APEK PENERIMA", "isBundleChild": false}, {"row": 122, "no": 118, "tanggal": "2026-11-21", "nama": "KERTAS NASI", "kategori": "Peralatan", "jumlah": 11.0, "satuan": "1", "harga": 9772.0, "total": 107492, "toko": "HOTMAR NUGGET BROMO", "keterangan": "", "isBundleChild": false}, {"row": 123, "no": 119, "tanggal": "2026-11-21", "nama": "TELUR", "kategori": "BAHAN BAKU MAKANAN", "jumlah": 42.0, "satuan": "1", "harga": 2810.0, "total": 118020, "toko": "MAHKOTA PLASTIK", "keterangan": "", "isBundleChild": false}, {"row": 124, "no": 120, "tanggal": "2026-11-21", "nama": "KELEBIHAN NOMINAL EXCEL", "kategori": "DISKON", "jumlah": 1.0, "satuan": "1", "harga": -12.0, "total": -12, "toko": "BLANCING NOMINAL", "keterangan": "", "isBundleChild": false}, {"row": 125, "no": 121, "tanggal": "2026-11-21", "nama": "PEMBUATAN MENU DAN QRIS MENU MEJA", "kategori": "Lain-lain", "jumlah": 1.0, "satuan": "21", "harga": 91000.0, "total": 91000, "toko": "FotoCopy Pasar Merah", "keterangan": "wa.me/+6282165233729", "isBundleChild": false}, {"row": 126, "no": 122, "tanggal": "2026-11-22", "nama": "UANG PICKUP PAKAM KE NIBUNG MEDAN", "kategori": "Lain-lain", "jumlah": 1.0, "satuan": "1", "harga": 390000.0, "total": 390000, "toko": "FotoCopy Pasar Merah", "keterangan": "wa.me/+6282165233729", "isBundleChild": false}, {"row": 127, "no": 123, "tanggal": "2026-11-22", "nama": "PELUNASAN UANG LAPAK", "kategori": "SEWA LAPAK", "jumlah": 1.0, "satuan": "1", "harga": 1200000.0, "total": 1200000, "toko": "LAPAK NIBUNG", "keterangan": "ATAS NAMA APEK PENERIMA", "isBundleChild": false}, {"row": 128, "no": 124, "tanggal": "2026-11-22", "nama": "SUSU UHT", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 6.0, "satuan": "1", "harga": 23000.0, "total": 138000, "toko": "NGAMBIL DARI TEGUH", "keterangan": "", "isBundleChild": false}, {"row": 129, "no": 125, "tanggal": "2026-11-22", "nama": "ES BATU CRISTAL", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": 20000.0, "total": 20000, "toko": "Ambil Di Deket Lapangan Voly Pajak Petisah", "keterangan": "", "isBundleChild": false}, {"row": 130, "no": 126, "tanggal": "2026-11-22", "nama": "GM EMBER COR 22LTR", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 12000.0, "total": 12000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 131, "no": 127, "tanggal": "2026-11-22", "nama": "GM KERANJANG SAMPAH 33", "kategori": "Peralatan", "jumlah": 2.0, "satuan": "1", "harga": 10000.0, "total": 20000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 132, "no": 128, "tanggal": "2026-11-22", "nama": "GOLDEN DRAGON MANGKOK ULIR MIRING WO709", "kategori": "Peralatan", "jumlah": 5.0, "satuan": "1", "harga": 14000.0, "total": 70000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 133, "no": 129, "tanggal": "2026-11-22", "nama": "GOLDEN DRAGON PIRING PO108 8'", "kategori": "Peralatan", "jumlah": 5.0, "satuan": "1", "harga": 15000.0, "total": 75000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 134, "no": 130, "tanggal": "2026-11-22", "nama": "GOLD STAR TENDA JADI 2X6/JERAPAH", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 98000.0, "total": 98000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 135, "no": 131, "tanggal": "2026-11-22", "nama": "FUJIKA SENDOK SOUP NIKEL PMN 203/ PWN/PS", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 13500.0, "total": 13500, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 136, "no": 132, "tanggal": "2026-11-22", "nama": "EUROPA TALAM S/S BULAT POLO 35 CM LTO-35", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 29500.0, "total": 29500, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 137, "no": 133, "tanggal": "2026-11-22", "nama": "BAWANG GORENG", "kategori": "BAHAN BAKU MAKANAN", "jumlah": 2.0, "satuan": "1", "harga": 6000.0, "total": 12000, "toko": "PAJAK SUKARAMAI", "keterangan": "AR.HAKIM", "isBundleChild": false}, {"row": 138, "no": 134, "tanggal": "2026-11-22", "nama": "QRIS GOPAY MERCHANT", "kategori": "Lain-lain", "jumlah": 1.0, "satuan": "1", "harga": 7000.0, "total": 7000, "toko": "FotoCopy Pasar Merah", "keterangan": "wa.me/+6282165233729", "isBundleChild": false}, {"row": 139, "no": 135, "tanggal": "2026-11-22", "nama": "PAKCOY", "kategori": "BAHAN BAKU MAKANAN", "jumlah": 2.0, "satuan": "1", "harga": 10000.0, "total": 20000, "toko": "PAJAK SUKARAMAI", "keterangan": "AR.HAKIM", "isBundleChild": false}, {"row": 140, "no": 136, "tanggal": "2026-11-22", "nama": "GALON CLEO BESERTA ISINYA", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": 57500.0, "total": 57500, "toko": "INDOMARET NIBUNG", "keterangan": "", "isBundleChild": false}, {"row": 141, "no": 137, "tanggal": "2026-11-22", "nama": "ES BATU CRISTAL", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": 10000.0, "total": 10000, "toko": "ORANG PAJAK NAWARIN", "keterangan": "", "isBundleChild": false}, {"row": 142, "no": 138, "tanggal": "2026-11-23", "nama": "Kepala COK", "kategori": "LAIN-LAIN", "jumlah": 3.0, "satuan": "1", "harga": 10000.0, "total": 30000, "toko": "PANGLONG", "keterangan": "", "isBundleChild": false}, {"row": 143, "no": 139, "tanggal": "2026-11-24", "nama": "Es Batu CRISTAL", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": 10000.0, "total": 10000, "toko": "PAJAK NIBUNG", "keterangan": "", "isBundleChild": false}, {"row": 144, "no": 140, "tanggal": "2026-11-24", "nama": "Isi ulang galon", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": 7000.0, "total": 7000, "toko": "PAJAK NIBUNG", "keterangan": "", "isBundleChild": false}, {"row": 145, "no": 141, "tanggal": "2026-11-24", "nama": "Es Batu CRISTAL", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": 15000.0, "total": 15000, "toko": "PAJAK NIBUNG", "keterangan": "", "isBundleChild": false}, {"row": 146, "no": 142, "tanggal": "2026-11-24", "nama": "Susu omela", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 2.0, "satuan": "1", "harga": 12500.0, "total": 25000, "toko": "INDOMARET SKIP", "keterangan": "", "isBundleChild": false}, {"row": 147, "no": 143, "tanggal": "2026-11-25", "nama": "UNO Universal", "kategori": "LAIN-LAIN", "jumlah": 1.0, "satuan": "1", "harga": 15000.0, "total": 15000, "toko": "HORI PHOTOCOPY", "keterangan": "", "isBundleChild": false}, {"row": 148, "no": 144, "tanggal": "2026-11-25", "nama": "UNO FLIP FLOP", "kategori": "LAIN-LAIN", "jumlah": 1.0, "satuan": "1", "harga": 15000.0, "total": 15000, "toko": "HORI PHOTOCOPY", "keterangan": "", "isBundleChild": false}, {"row": 149, "no": 145, "tanggal": "", "nama": "DOUBLE TAPE", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 97000.0, "total": 97000, "toko": "HORI PHOTOCOPY", "keterangan": "", "isBundleChild": false}, {"row": 150, "no": 146, "tanggal": "", "nama": "SPIDOL", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "HORI PHOTOCOPY", "keterangan": "", "isBundleChild": true}, {"row": 151, "no": 147, "tanggal": "", "nama": "PULPEN", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "HORI PHOTOCOPY", "keterangan": "", "isBundleChild": true}, {"row": 152, "no": 148, "tanggal": "", "nama": "PENGHAPUS PAPA TULIS", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "HORI PHOTOCOPY", "keterangan": "", "isBundleChild": true}, {"row": 153, "no": 149, "tanggal": "", "nama": "SISIR", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": null, "total": null, "toko": "HORI PHOTOCOPY", "keterangan": "", "isBundleChild": true}, {"row": 154, "no": 150, "tanggal": "", "nama": "PAPAN TULIS", "kategori": "LAIN-LAIN", "jumlah": 1.0, "satuan": "1", "harga": 41000.0, "total": 41000, "toko": "PHOTOCOPY", "keterangan": "", "isBundleChild": false}, {"row": 155, "no": 151, "tanggal": "", "nama": "SARINGAN TEH", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 9000.0, "total": 9000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 156, "no": 152, "tanggal": "", "nama": "GELAS", "kategori": "Peralatan", "jumlah": 1.0, "satuan": "1", "harga": 10000.0, "total": 10000, "toko": "BALIKADO", "keterangan": "", "isBundleChild": false}, {"row": 157, "no": 153, "tanggal": "", "nama": "Es Batu CRISTAL", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": 15000.0, "total": 15000, "toko": "PAJAK NIBUNG", "keterangan": "", "isBundleChild": false}, {"row": 158, "no": 154, "tanggal": "", "nama": "SIRUP VANILA MARJAN", "kategori": "BAHAN BAKU MINUMAN", "jumlah": 1.0, "satuan": "1", "harga": 27000.0, "total": 27000, "toko": "GEDE ACEH NIBUNG", "keterangan": "", "isBundleChild": false}];
+    const GAS_CODE_TEXT = "/**\n * Google Apps Script Backend — Laporan Uang Keluar Angkringan AmanLahLek\n * Hubungkan ke Google Sheet: \"Laporan Uang Keluar Masuk Angkirangan AmanLahLek\"\n * Tab target: \"Laporan Uang Keluar Masuk\"\n *\n * Cara Deploy:\n * 1. Buka Google Sheet -> Extensions -> Apps Script\n * 2. Hapus kode lama, tempel seluruh kode ini, lalu simpan (Ctrl+S)\n * 3. Klik Deploy -> New deployment -> Pilih \"Web app\"\n * 4. Execute as: \"Me\", Who has access: \"Anyone\"\n * 5. Klik Deploy, salin URL Web App (.../exec), lalu tempel di Pengaturan Aplikasi / DEFAULT_API_URL\n */\n\nvar SHEET_NAME = 'Laporan Uang Keluar Masuk';\nvar DATA_START_ROW = 5;\n\nfunction getTargetSheet_() {\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  var sheet = ss.getSheetByName(SHEET_NAME);\n  if (!sheet) {\n    sheet = ss.getSheets()[0];\n  }\n  return sheet;\n}\n\nfunction jsonResponse_(obj) {\n  return ContentService\n    .createTextOutput(JSON.stringify(obj))\n    .setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction formatDateIso_(val) {\n  if (!val) return '';\n  if (Object.prototype.toString.call(val) === '[object Date]' && !isNaN(val.getTime())) {\n    return Utilities.formatDate(val, Session.getScriptTimeZone() || 'Asia/Jakarta', 'yyyy-MM-dd');\n  }\n  var s = String(val).trim();\n  if (/^\\d{4}-\\d{2}-\\d{2}/.test(s)) return s.substring(0, 10);\n  var d = new Date(s);\n  if (!isNaN(d.getTime())) {\n    return Utilities.formatDate(d, Session.getScriptTimeZone() || 'Asia/Jakarta', 'yyyy-MM-dd');\n  }\n  return s;\n}\n\nfunction toNumOrNull_(val) {\n  if (val === '' || val === null || typeof val === 'undefined') return null;\n  var n = Number(val);\n  return isNaN(n) ? null : n;\n}\n\nfunction findLastDataRow_(sheet) {\n  var maxRow = sheet.getLastRow();\n  if (maxRow < DATA_START_ROW) return DATA_START_ROW - 1;\n  var values = sheet.getRange(DATA_START_ROW, 1, maxRow - DATA_START_ROW + 1, 10).getValues();\n  var lastData = DATA_START_ROW - 1;\n  for (var i = values.length - 1; i >= 0; i--) {\n    var r = values[i];\n    if (r[0] !== '' || r[2] !== '' || r[3] !== '' || r[6] !== '' || r[7] !== '') {\n      lastData = DATA_START_ROW + i;\n      break;\n    }\n  }\n  return lastData;\n}\n\nfunction getAllData_() {\n  var sheet = getTargetSheet_();\n  var lastDataRow = findLastDataRow_(sheet);\n  var transactions = [];\n\n  if (lastDataRow >= DATA_START_ROW) {\n    var numRows = lastDataRow - DATA_START_ROW + 1;\n    var range = sheet.getRange(DATA_START_ROW, 1, numRows, 10);\n    var values = range.getValues();\n\n    // Deteksi baris yang berada di dalam sel gabungan (merged) kolom H (Total)\n    var mergedRanges = range.getMergedRanges();\n    var mergedChildRows = {};\n    var mergedTokoMap = {};\n    var mergedKetMap = {};\n\n    for (var m = 0; m < mergedRanges.length; m++) {\n      var mr = mergedRanges[m];\n      var rStart = mr.getRow();\n      var rEnd = mr.getLastRow();\n      var cStart = mr.getColumn();\n      var cEnd = mr.getLastColumn();\n      if (rEnd > rStart) {\n        if (cStart <= 8 && cEnd >= 8) {\n          for (var rr = rStart + 1; rr <= rEnd; rr++) {\n            mergedChildRows[rr] = true;\n          }\n        }\n        if (cStart <= 9 && cEnd >= 9) {\n          var parentToko = String(sheet.getRange(rStart, 9).getValue() || '').trim();\n          for (var rt = rStart + 1; rt <= rEnd; rt++) {\n            mergedTokoMap[rt] = parentToko;\n          }\n        }\n        if (cStart <= 10 && cEnd >= 10) {\n          var parentKet = String(sheet.getRange(rStart, 10).getValue() || '').trim();\n          for (var rk = rStart + 1; rk <= rEnd; rk++) {\n            mergedKetMap[rk] = parentKet;\n          }\n        }\n      }\n    }\n\n    for (var i = 0; i < values.length; i++) {\n      var rowNum = DATA_START_ROW + i;\n      var row = values[i];\n      if (row[0] === '' && row[2] === '' && row[3] === '' && row[7] === '') continue;\n\n      var isBundleChild = Boolean(mergedChildRows[rowNum]);\n      var toko = String(row[8] || '').trim() || (mergedTokoMap[rowNum] || '');\n      var ket = String(row[9] || '').trim() || (mergedKetMap[rowNum] || '');\n\n      transactions.push({\n        row: rowNum,\n        no: toNumOrNull_(row[0]) || (i + 1),\n        tanggal: formatDateIso_(row[1]),\n        nama: String(row[2] || '').trim(),\n        kategori: String(row[3] || '').trim(),\n        jumlah: toNumOrNull_(row[4]),\n        satuan: row[5] !== '' && row[5] !== null ? String(row[5]).trim() : '1',\n        harga: isBundleChild ? null : toNumOrNull_(row[6]),\n        total: isBundleChild ? null : toNumOrNull_(row[7]),\n        toko: toko,\n        keterangan: ket,\n        isBundleChild: isBundleChild\n      });\n    }\n  }\n\n  var modal = {\n    abdul: toNumOrNull_(sheet.getRange('O6').getValue()) || 0,\n    ari: toNumOrNull_(sheet.getRange('O9').getValue()) || 0,\n    usman: toNumOrNull_(sheet.getRange('O12').getValue()) || 0\n  };\n\n  return {\n    status: 'ok',\n    sheetName: sheet.getName(),\n    pencatat: String(sheet.getRange('C2').getValue() || 'Dicatat oleh: M.ABDUL YAHYA'),\n    transactions: transactions,\n    modal: modal,\n    updatedAt: new Date().toISOString()\n  };\n}\n\nfunction doGet(e) {\n  try {\n    var action = (e && e.parameter && e.parameter.action) ? String(e.parameter.action) : 'getAll';\n    if (action === 'ping') {\n      return jsonResponse_({ status: 'ok', message: 'API Laporan Uang Keluar aktif', time: new Date().toISOString() });\n    }\n    return jsonResponse_(getAllData_());\n  } catch (err) {\n    return jsonResponse_({ status: 'error', message: String(err) });\n  }\n}\n\nfunction doPost(e) {\n  var lock = LockService.getScriptLock();\n  try {\n    lock.waitLock(15000);\n    var raw = (e && e.postData && e.postData.contents) ? e.postData.contents : '{}';\n    var payload = JSON.parse(raw);\n    var action = payload.action || '';\n    var sheet = getTargetSheet_();\n\n    if (action === 'add') {\n      var lastDataRow = findLastDataRow_(sheet);\n      var newRow = Math.max(DATA_START_ROW, lastDataRow + 1);\n      var prevNo = 0;\n      if (lastDataRow >= DATA_START_ROW) {\n        var nos = sheet.getRange(DATA_START_ROW, 1, lastDataRow - DATA_START_ROW + 1, 1).getValues();\n        for (var i = 0; i < nos.length; i++) {\n          var n = Number(nos[i][0]);\n          if (!isNaN(n) && n > prevNo) prevNo = n;\n        }\n      }\n      var nextNo = prevNo + 1;\n      var tglVal = payload.tanggal ? new Date(payload.tanggal + 'T00:00:00') : new Date();\n      var jml = Number(payload.jumlah);\n      if (isNaN(jml) || jml === 0) jml = 1;\n      var sat = payload.satuan || '1';\n      var hrg = Number(payload.harga);\n      if (isNaN(hrg)) hrg = 0;\n\n      sheet.getRange(newRow, 1, 1, 7).setValues([[\n        nextNo,\n        tglVal,\n        String(payload.nama || '').trim(),\n        String(payload.kategori || 'LAIN-LAIN').trim(),\n        jml,\n        sat,\n        hrg\n      ]]);\n      sheet.getRange(newRow, 8).setFormula('=IF(OR(E' + newRow + '=\"\";G' + newRow + '=\"\");\"\";E' + newRow + '*G' + newRow + ')');\n      sheet.getRange(newRow, 9, 1, 2).setValues([[\n        String(payload.toko || '').trim(),\n        String(payload.keterangan || '').trim()\n      ]]);\n      sheet.getRange(newRow, 2).setNumberFormat('M/d/yyyy');\n      sheet.getRange(newRow, 7, 1, 2).setNumberFormat('\"Rp \"#,##0;-\"Rp \"#,##0');\n      SpreadsheetApp.flush();\n\n      return jsonResponse_({ status: 'ok', action: 'add', row: newRow, no: nextNo, data: getAllData_() });\n    }\n\n    if (action === 'update') {\n      var targetRow = Number(payload.row);\n      if (isNaN(targetRow) || targetRow < DATA_START_ROW) {\n        return jsonResponse_({ status: 'error', message: 'Nomor baris tidak valid.' });\n      }\n      var tglEdit = payload.tanggal ? new Date(payload.tanggal + 'T00:00:00') : '';\n      var jmlEdit = Number(payload.jumlah);\n      if (isNaN(jmlEdit) || jmlEdit === 0) jmlEdit = 1;\n      var hrgEdit = (payload.harga === null || payload.harga === '') ? '' : Number(payload.harga);\n\n      sheet.getRange(targetRow, 2, 1, 6).setValues([[\n        tglEdit,\n        String(payload.nama || '').trim(),\n        String(payload.kategori || 'LAIN-LAIN').trim(),\n        jmlEdit,\n        payload.satuan || '1',\n        hrgEdit\n      ]]);\n      if (!sheet.getRange(targetRow, 8).isPartOfMerge()) {\n        sheet.getRange(targetRow, 8).setFormula('=IF(OR(E' + targetRow + '=\"\";G' + targetRow + '=\"\");\"\";E' + targetRow + '*G' + targetRow + ')');\n      }\n      if (!sheet.getRange(targetRow, 9).isPartOfMerge()) {\n        sheet.getRange(targetRow, 9).setValue(String(payload.toko || '').trim());\n      }\n      if (!sheet.getRange(targetRow, 10).isPartOfMerge()) {\n        sheet.getRange(targetRow, 10).setValue(String(payload.keterangan || '').trim());\n      }\n      SpreadsheetApp.flush();\n      return jsonResponse_({ status: 'ok', action: 'update', row: targetRow, data: getAllData_() });\n    }\n\n    if (action === 'delete') {\n      var delRow = Number(payload.row);\n      if (isNaN(delRow) || delRow < DATA_START_ROW) {\n        return jsonResponse_({ status: 'error', message: 'Nomor baris tidak valid.' });\n      }\n      // PENTING: Jangan pernah pakai sheet.deleteRow() karena akan menggeser tabel ringkasan di kolom L:X!\n      var checkRange = sheet.getRange(delRow, 7, 1, 4);\n      if (checkRange.isPartOfMerge()) {\n        return jsonResponse_({\n          status: 'error',\n          message: 'Baris ini bagian dari sel gabungan (paket Take Over / Hori Photocopy). Edit atau hapus langsung di Google Sheet agar format paket tetap aman.'\n        });\n      }\n      var lastRowDel = findLastDataRow_(sheet);\n      sheet.getRange(delRow, 1, 1, 10).clearContent();\n\n      // Geser naik hanya kolom A:J jika bukan baris terakhir dan di bawahnya tidak ada merged cell\n      if (delRow < lastRowDel) {\n        var belowRange = sheet.getRange(delRow + 1, 1, lastRowDel - delRow, 10);\n        if (!belowRange.isPartOfMerge()) {\n          var belowVals = belowRange.getValues();\n          sheet.getRange(delRow, 1, belowVals.length, 10).setValues(belowVals);\n          sheet.getRange(lastRowDel, 1, 1, 10).clearContent();\n          // Perbaiki rumus kolom H pada baris yang digeser\n          for (var rFix = delRow; rFix < lastRowDel; rFix++) {\n            sheet.getRange(rFix, 8).setFormula('=IF(OR(E' + rFix + '=\"\";G' + rFix + '=\"\");\"\";E' + rFix + '*G' + rFix + ')');\n          }\n        }\n      }\n      SpreadsheetApp.flush();\n      return jsonResponse_({ status: 'ok', action: 'delete', row: delRow, data: getAllData_() });\n    }\n\n    if (action === 'updateModal') {\n      if (typeof payload.abdul !== 'undefined') sheet.getRange('O6').setValue(Number(payload.abdul) || 0);\n      if (typeof payload.ari !== 'undefined') sheet.getRange('O9').setValue(Number(payload.ari) || 0);\n      if (typeof payload.usman !== 'undefined') sheet.getRange('O12').setValue(Number(payload.usman) || 0);\n      SpreadsheetApp.flush();\n      return jsonResponse_({ status: 'ok', action: 'updateModal', data: getAllData_() });\n    }\n\n    return jsonResponse_({ status: 'error', message: 'Action tidak dikenal: ' + action });\n  } catch (err) {\n    return jsonResponse_({ status: 'error', message: String(err) });\n  } finally {\n    lock.releaseLock();\n  }\n}\n";
+
+    // App State
+    let state = {
+      apiUrl: "",
+      connected: false,
+      loading: false,
+      activeTab: "ringkasan",
+      transactions: JSON.parse(JSON.stringify(INITIAL_TRANSACTIONS)),
+      modal: Object.assign({}, INITIAL_MODAL),
+      pendingDeleteRow: null,
+      charts: {
+        kategori: null,
+        toko: null
+      }
+    };
+
+    // Safe localStorage helpers
+    function loadSavedApiUrl() {
+      try {
+        const saved = window.localStorage.getItem(STORAGE_KEY_API);
+        if (saved && saved.trim() && saved.trim() !== "https://script.google.com/macros/s/AKfycbz1NjdAcdePA0Zo8_A3D3nWdrCLBvZETZa5V7ebbq2uvmBQLqbtpBCXpIfs--yqijl6hw/exec") {
+          return saved.trim();
+        }
+      } catch (e) {}
+      return DEFAULT_API_URL.trim();
+    }
+
+    function saveApiUrl(url) {
+      try {
+        if (url) window.localStorage.setItem(STORAGE_KEY_API, url);
+        else window.localStorage.removeItem(STORAGE_KEY_API);
+      } catch (e) {}
+    }
+
+    function formatRp(num) {
+      const n = Number(num);
+      if (isNaN(n)) return "Rp 0";
+      const rounded = Math.round(n);
+      const neg = rounded < 0;
+      const absStr = Math.abs(rounded).toLocaleString("id-ID");
+      return (neg ? "-Rp " : "Rp ") + absStr;
+    }
+
+    function normalizeCategory(cat) {
+      const s = String(cat || "").trim();
+      if (!s) return "LAIN-LAIN";
+      const upper = s.toUpperCase();
+      for (let i = 0; i < OFFICIAL_CATEGORIES.length; i++) {
+        if (OFFICIAL_CATEGORIES[i].toUpperCase() === upper) return OFFICIAL_CATEGORIES[i];
+      }
+      return s;
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function getTodayIso() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      return y + "-" + m + "-" + d;
+    }
+
+    let toastTimer = null;
+    function showToast(msg, isError) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.className = "fixed bottom-5 right-5 z-50 max-w-sm rounded-xl border px-4 py-3 text-xs font-semibold shadow-2xl " +
+        (isError
+          ? "border-rose-500/60 bg-[#2b1416] text-rose-100"
+          : "border-[#d9a441]/60 bg-[#1f1813] text-[#f6ede2]");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        el.classList.add("hidden");
+      }, 3600);
+    }
+
+    function computeMetrics() {
+      const txs = state.transactions;
+      const catTotals = {};
+      const catCounts = {};
+      OFFICIAL_CATEGORIES.forEach(c => {
+        catTotals[c] = 0;
+        catCounts[c] = 0;
+      });
+
+      const tokoTotals = {};
+      const tokoSet = new Set();
+      let totalPengeluaran = 0;
+      let bulanIni = 0;
+      let hariIni = 0;
+
+      const todayStr = getTodayIso();
+      const ymStr = todayStr.slice(0, 7);
+
+      txs.forEach(t => {
+        const cat = normalizeCategory(t.kategori);
+        if (typeof catTotals[cat] === "undefined") {
+          catTotals[cat] = 0;
+          catCounts[cat] = 0;
+        }
+        catCounts[cat] += 1;
+
+        const val = (typeof t.total === "number" && !isNaN(t.total)) ? t.total : 0;
+        catTotals[cat] += val;
+        totalPengeluaran += val;
+
+        if (t.tanggal && t.tanggal.slice(0, 7) === ymStr) bulanIni += val;
+        if (t.tanggal === todayStr) hariIni += val;
+
+        const tk = (t.toko || "").trim();
+        if (tk) {
+          tokoSet.add(tk);
+          tokoTotals[tk] = (tokoTotals[tk] || 0) + val;
+        }
+      });
+
+      const totalModal = (Number(state.modal.abdul) || 0) + (Number(state.modal.ari) || 0) + (Number(state.modal.usman) || 0);
+      const sisaModal = totalModal - totalPengeluaran;
+      const bagi3 = totalPengeluaran / 3;
+      const avg = txs.length > 0 ? totalPengeluaran / txs.length : 0;
+      const pctUsed = totalModal > 0 ? (totalPengeluaran / totalModal) * 100 : 0;
+
+      return {
+        count: txs.length,
+        totalPengeluaran,
+        totalModal,
+        sisaModal,
+        bagi3,
+        avg,
+        pctUsed,
+        bulanIni,
+        hariIni,
+        catTotals,
+        catCounts,
+        tokoTotals,
+        tokoList: Array.from(tokoSet).sort((a, b) => a.localeCompare(b))
+      };
+    }
+
+    function updateStatusBadge() {
+      const dot = document.getElementById("status-dot");
+      const text = document.getElementById("status-text");
+      if (state.connected && state.apiUrl) {
+        dot.className = "h-2 w-2 rounded-full bg-emerald-400";
+        text.textContent = "Terhubung ke Google Sheet (" + state.transactions.length + " data)";
+      } else {
+        dot.className = "h-2 w-2 rounded-full bg-amber-400";
+        text.textContent = "Mode Snapshot Sheet (" + state.transactions.length + " data)";
+      }
+    }
+
+    function populateFilterDropdowns(metrics) {
+      const selKat = document.getElementById("filter-kategori");
+      const curKat = selKat.value;
+      const allCats = Object.keys(metrics.catCounts);
+      selKat.innerHTML = '<option value="ALL">Semua Kategori (' + metrics.count + ')</option>' +
+        allCats.map(c => '<option value="' + escapeHtml(c) + '">' + escapeHtml(c) + ' (' + metrics.catCounts[c] + ')</option>').join("");
+      if (allCats.includes(curKat)) selKat.value = curKat;
+
+      const selToko = document.getElementById("filter-toko");
+      const curToko = selToko.value;
+      selToko.innerHTML = '<option value="ALL">Semua Toko / Pemasok (' + metrics.tokoList.length + ')</option>' +
+        metrics.tokoList.map(tk => '<option value="' + escapeHtml(tk) + '">' + escapeHtml(tk) + '</option>').join("");
+      if (metrics.tokoList.includes(curToko)) selToko.value = curToko;
+
+      const dlToko = document.getElementById("datalist-toko");
+      dlToko.innerHTML = metrics.tokoList.map(tk => '<option value="' + escapeHtml(tk) + '"></option>').join("");
+
+      const txKat = document.getElementById("tx-kategori");
+      if (!txKat.options.length) {
+        txKat.innerHTML = OFFICIAL_CATEGORIES.map(c => '<option value="' + escapeHtml(c) + '">' + escapeHtml(c) + '</option>').join("");
+      }
+    }
+
+    function renderSummaryAndCharts(metrics) {
+      document.getElementById("nav-count").textContent = String(metrics.count);
+      document.getElementById("kpi-tx-badge").textContent = metrics.count + " item";
+      document.getElementById("kpi-total-pengeluaran").textContent = formatRp(metrics.totalPengeluaran);
+      document.getElementById("kpi-avg").textContent = formatRp(metrics.avg);
+      document.getElementById("kpi-total-modal").textContent = formatRp(metrics.totalModal);
+      document.getElementById("kpi-pct-used").textContent = metrics.pctUsed.toFixed(1).replace(".", ",") + "%";
+      document.getElementById("kpi-sisa-modal").textContent = formatRp(metrics.sisaModal);
+      document.getElementById("kpi-bagi-3").textContent = formatRp(metrics.bagi3);
+      document.getElementById("kpi-bulan-ini").textContent = formatRp(metrics.bulanIni);
+      document.getElementById("kpi-hari-ini").textContent = formatRp(metrics.hariIni);
+      document.getElementById("kpi-toko-count").textContent = metrics.tokoList.length + " pemasok";
+
+      const sisaEl = document.getElementById("kpi-sisa-modal");
+      const sisaBadge = document.getElementById("kpi-sisa-badge");
+      if (metrics.sisaModal >= 0) {
+        sisaEl.className = "mt-2 text-2xl font-extrabold tracking-tight text-emerald-300";
+        sisaBadge.className = "rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-300";
+        sisaBadge.textContent = "Surplus";
+      } else {
+        sisaEl.className = "mt-2 text-2xl font-extrabold tracking-tight text-rose-400";
+        sisaBadge.className = "rounded-full bg-rose-500/15 px-2 py-0.5 text-[11px] font-semibold text-rose-300";
+        sisaBadge.textContent = "Defisit";
+      }
+
+      // Category table
+      const tbodyKat = document.getElementById("tbody-ringkasan-kategori");
+      const catEntries = Object.keys(metrics.catTotals).map(k => ({
+        name: k,
+        total: metrics.catTotals[k],
+        count: metrics.catCounts[k] || 0
+      })).sort((a, b) => b.total - a.total);
+
+      tbodyKat.innerHTML = catEntries.map(item => {
+        const pct = metrics.totalPengeluaran !== 0 ? (item.total / metrics.totalPengeluaran) * 100 : 0;
+        const color = CATEGORY_COLORS[item.name] || "#d9a441";
+        return `
+          <tr data-filter-cat="${escapeHtml(item.name)}" class="cursor-pointer hover:bg-[#261e19] transition">
+            <td class="px-4 py-2.5 font-medium text-[#f6ede2]">
+              <span class="inline-flex items-center gap-2">
+                <span class="h-2.5 w-2.5 rounded-full shrink-0" style="background:${color}"></span>
+                ${escapeHtml(item.name)}
+              </span>
+            </td>
+            <td class="px-4 py-2.5 text-right text-[#cbb9a7]">${item.count}</td>
+            <td class="px-4 py-2.5 text-right font-semibold ${item.total < 0 ? 'text-emerald-300' : 'text-[#f6ede2]'}">${formatRp(item.total)}</td>
+            <td class="px-4 py-2.5 text-right text-xs text-[#b3a292]">${pct.toFixed(1).replace('.', ',')}%</td>
+          </tr>
+        `;
+      }).join("") + `
+        <tr class="bg-[#241c17] font-bold">
+          <td class="px-4 py-3 text-[#e5b85c]">TOTAL PENGELUARAN</td>
+          <td class="px-4 py-3 text-right text-[#f6ede2]">${metrics.count}</td>
+          <td class="px-4 py-3 text-right text-[#e5b85c]">${formatRp(metrics.totalPengeluaran)}</td>
+          <td class="px-4 py-3 text-right text-[#e5b85c]">100%</td>
+        </tr>
+      `;
+
+      // Charts
+      if (typeof Chart !== "undefined") {
+        const posCats = catEntries.filter(x => x.total > 0);
+        const ctxKat = document.getElementById("chart-kategori").getContext("2d");
+        if (state.charts.kategori) state.charts.kategori.destroy();
+        state.charts.kategori = new Chart(ctxKat, {
+          type: "doughnut",
+          data: {
+            labels: posCats.map(x => x.name),
+            datasets: [{
+              data: posCats.map(x => x.total),
+              backgroundColor: posCats.map(x => CATEGORY_COLORS[x.name] || "#d9a441"),
+              borderColor: "#1d1713",
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "60%",
+            plugins: {
+              legend: {
+                position: "right",
+                labels: {
+                  color: "#e7d4bd",
+                  boxWidth: 11,
+                  font: { size: 11 }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: ctx => " " + ctx.label + ": " + formatRp(ctx.raw)
+                }
+              }
+            }
+          }
+        });
+
+        const topToko = Object.entries(metrics.tokoTotals)
+          .filter(([, v]) => v > 0)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 8);
+
+        const ctxToko = document.getElementById("chart-toko").getContext("2d");
+        if (state.charts.toko) state.charts.toko.destroy();
+        state.charts.toko = new Chart(ctxToko, {
+          type: "bar",
+          data: {
+            labels: topToko.map(([k]) => k.length > 20 ? k.slice(0, 19) + "…" : k),
+            datasets: [{
+              label: "Total (Rp)",
+              data: topToko.map(([, v]) => v),
+              backgroundColor: "#d9a441",
+              borderRadius: 6
+            }]
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: ctx => " " + formatRp(ctx.raw)
+                }
+              }
+            },
+            scales: {
+              x: {
+                ticks: {
+                  color: "#b3a292",
+                  font: { size: 10 },
+                  callback: v => v >= 1000000 ? (v / 1000000).toFixed(1) + " jt" : (v / 1000) + " rb"
+                },
+                grid: { color: "rgba(255,255,255,0.06)" }
+              },
+              y: {
+                ticks: { color: "#e7d4bd", font: { size: 11 } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    function getFilteredTransactions() {
+      const q = document.getElementById("filter-search").value.trim().toLowerCase();
+      const kat = document.getElementById("filter-kategori").value;
+      const toko = document.getElementById("filter-toko").value;
+      const sort = document.getElementById("filter-sort").value;
+
+      let list = state.transactions.filter(t => {
+        if (kat !== "ALL" && normalizeCategory(t.kategori) !== kat) return false;
+        if (toko !== "ALL" && (t.toko || "").trim() !== toko) return false;
+        if (q) {
+          const hay = (t.nama + " " + t.toko + " " + t.keterangan + " " + t.kategori + " " + t.tanggal).toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      list = list.slice();
+      if (sort === "no-desc") list.sort((a, b) => b.no - a.no);
+      else if (sort === "no-asc") list.sort((a, b) => a.no - b.no);
+      else if (sort === "total-desc") list.sort((a, b) => (b.total || 0) - (a.total || 0));
+      else if (sort === "total-asc") list.sort((a, b) => (a.total || 0) - (b.total || 0));
+
+      return list;
+    }
+
+    function renderTransactionsTable() {
+      const filtered = getFilteredTransactions();
+      const limitVal = document.getElementById("select-limit").value;
+      const visible = limitVal === "ALL" ? filtered : filtered.slice(0, Number(limitVal));
+      const subtotal = filtered.reduce((acc, t) => acc + (typeof t.total === "number" ? t.total : 0), 0);
+
+      document.getElementById("filter-summary-text").textContent =
+        "Menampilkan " + visible.length + " dari " + filtered.length + " transaksi cocok";
+      document.getElementById("filter-subtotal").textContent = formatRp(subtotal);
+
+      const tbody = document.getElementById("tbody-transaksi");
+      if (visible.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="px-4 py-10 text-center text-sm text-[#a39180]">Tidak ada transaksi yang cocok dengan filter.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = visible.map(t => {
+        const cat = normalizeCategory(t.kategori);
+        const color = CATEGORY_COLORS[cat] || "#d9a441";
+        const totalHtml = t.isBundleChild
+          ? '<span class="inline-block rounded-md bg-[#2c221b] px-2 py-0.5 text-[11px] font-medium text-[#b3a292]">Termasuk Paket</span>'
+          : '<span class="font-bold ' + ((t.total || 0) < 0 ? 'text-emerald-300' : 'text-[#f6ede2]') + '">' + formatRp(t.total || 0) + '</span>';
+        const hargaHtml = t.isBundleChild ? '—' : formatRp(t.harga || 0);
+        const ketSub = t.keterangan ? '<div class="text-[11px] text-[#9b8979] truncate max-w-[220px]">' + escapeHtml(t.keterangan) + '</div>' : '';
+
+        return `
+          <tr class="hover:bg-[#241c17] transition">
+            <td class="px-3 py-2.5 text-[#a39180] font-mono text-xs">${t.no}</td>
+            <td class="px-3 py-2.5 whitespace-nowrap text-xs text-[#cbb9a7]">${escapeHtml(t.tanggal || '—')}</td>
+            <td class="px-3 py-2.5">
+              <div class="font-semibold text-[#f6ede2]">${escapeHtml(t.nama)}</div>
+              ${ketSub}
+            </td>
+            <td class="px-3 py-2.5 whitespace-nowrap">
+              <span class="inline-flex items-center gap-1.5 rounded-full border border-[#3f3128] bg-[#15100d] px-2.5 py-0.5 text-[11px] font-medium text-[#e7d4bd]">
+                <span class="h-1.5 w-1.5 rounded-full" style="background:${color}"></span>
+                ${escapeHtml(cat)}
+              </span>
+            </td>
+            <td class="px-3 py-2.5 text-right whitespace-nowrap text-[#cbb9a7]">${t.jumlah ?? 1} <span class="text-[11px] text-[#8d7b6b]">(${escapeHtml(t.satuan || '1')})</span></td>
+            <td class="px-3 py-2.5 text-right whitespace-nowrap text-[#cbb9a7]">${hargaHtml}</td>
+            <td class="px-3 py-2.5 text-right whitespace-nowrap">${totalHtml}</td>
+            <td class="px-3 py-2.5 text-xs text-[#cbb9a7] max-w-[160px] truncate" title="${escapeHtml(t.toko)}">${escapeHtml(t.toko || '—')}</td>
+            <td class="px-3 py-2.5 text-center whitespace-nowrap">
+              <div class="inline-flex items-center gap-1">
+                <button data-edit-row="${t.row}" type="button" class="rounded-lg border border-[#3f3128] px-2 py-1 text-[11px] font-semibold text-[#e5b85c] hover:border-[#d9a441] hover:bg-[#2b221c]">Edit</button>
+                <button data-del-row="${t.row}" type="button" class="rounded-lg border border-[#3f3128] px-2 py-1 text-[11px] font-semibold text-rose-300 hover:border-rose-400 hover:bg-rose-950/40">Hapus</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderModalPartners(metrics) {
+      document.getElementById("modal-bagi3-inline").textContent = formatRp(metrics.bagi3);
+      const partners = [
+        { key: "abdul", name: "ABDUL", cell: "O6", amount: Number(state.modal.abdul) || 0 },
+        { key: "ari", name: "ARI", cell: "O9", amount: Number(state.modal.ari) || 0 },
+        { key: "usman", name: "USMAN", cell: "O12", amount: Number(state.modal.usman) || 0 }
+      ];
+
+      const grid = document.getElementById("partner-cards-grid");
+      grid.innerHTML = partners.map(p => {
+        const diff = p.amount - metrics.bagi3;
+        const isPos = diff >= 0;
+        const sharePct = metrics.totalModal > 0 ? (p.amount / metrics.totalModal) * 100 : 0;
+        return `
+          <div class="card-warm rounded-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs font-semibold uppercase tracking-wider text-[#b3a292]">Partner (${p.cell})</div>
+                <h3 class="text-lg font-extrabold text-[#f6ede2]">MODAL ${p.name}</h3>
+              </div>
+              <span class="rounded-full px-2.5 py-1 text-[11px] font-bold ${isPos ? 'bg-emerald-500/15 text-emerald-300' : 'bg-rose-500/15 text-rose-300'}">
+                ${isPos ? 'Lebih Bayar' : 'Kurang Setor'}
+              </span>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between">
+                <span class="text-[#a39180]">Modal Disetor (${sharePct.toFixed(1).replace('.', ',')}%)</span>
+                <span class="font-bold text-[#f6ede2]">${formatRp(p.amount)}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#a39180]">Beban Pengeluaran (1/3)</span>
+                <span class="font-semibold text-[#d6c5b3]">${formatRp(metrics.bagi3)}</span>
+              </div>
+              <div class="border-t border-[#382c24] pt-2 flex justify-between items-baseline">
+                <span class="font-semibold text-[#e7d4bd]">Modal − Pengeluaran</span>
+                <span class="text-base font-extrabold ${isPos ? 'text-emerald-300' : 'text-rose-400'}">${isPos ? '+' : ''}${formatRp(diff)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      const clampedPct = Math.min(100, Math.max(0, metrics.pctUsed));
+      document.getElementById("modal-progress-label").textContent =
+        formatRp(metrics.totalPengeluaran) + " / " + formatRp(metrics.totalModal) + " (" + metrics.pctUsed.toFixed(1).replace(".", ",") + "%)";
+      document.getElementById("modal-progress-bar").style.width = clampedPct.toFixed(1) + "%";
+      const footerSisa = document.getElementById("modal-sisa-footer");
+      footerSisa.textContent = formatRp(metrics.sisaModal);
+      footerSisa.className = metrics.sisaModal >= 0 ? "text-emerald-300" : "text-rose-400";
+    }
+
+    function renderAll() {
+      const metrics = computeMetrics();
+      updateStatusBadge();
+      populateFilterDropdowns(metrics);
+      renderSummaryAndCharts(metrics);
+      renderTransactionsTable();
+      renderModalPartners(metrics);
+    }
+
+    function switchTab(tabName) {
+      state.activeTab = tabName;
+      ["ringkasan", "transaksi", "modal", "koneksi"].forEach(t => {
+        const sec = document.getElementById("tab-" + t);
+        if (sec) sec.classList.toggle("hidden", t !== tabName);
+      });
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        const active = btn.getAttribute("data-tab") === tabName;
+        btn.classList.toggle("active", active);
+        if (!active) btn.classList.add("text-[#cbb9a7]");
+        else btn.classList.remove("text-[#cbb9a7]");
+      });
+      if (tabName === "ringkasan") {
+        renderSummaryAndCharts(computeMetrics());
+      }
+    }
+
+    // API Sync
+    async function syncFromSheet(silent) {
+      if (!state.apiUrl) {
+        if (!silent) showToast("Masukkan URL Web App Apps Script di tab Koneksi GitHub & Sheet untuk sinkronisasi live.", false);
+        return false;
+      }
+      try {
+        const sep = state.apiUrl.includes("?") ? "&" : "?";
+        const res = await fetch(state.apiUrl + sep + "action=getAll&t=" + Date.now(), { redirect: "follow" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const rawText = await res.text();
+        if (rawText.trim().startsWith("<")) {
+          throw new Error("Server mengirim halaman HTML (bukan JSON). Pastikan deployment Apps Script = Web app & akses = Anyone.");
+        }
+        const json = JSON.parse(rawText);
+        if (json.status !== "ok") throw new Error(json.message || "Respon API tidak valid");
+        if (Array.isArray(json.transactions)) state.transactions = json.transactions;
+        if (json.modal) state.modal = json.modal;
+        state.connected = true;
+        renderAll();
+        if (!silent) showToast("Berhasil sinkronisasi " + state.transactions.length + " data dari Google Sheet.", false);
+        return true;
+      } catch (err) {
+        state.connected = false;
+        updateStatusBadge();
+        if (!silent) showToast("Gagal terhubung ke Sheet: " + err.message, true);
+        return false;
+      }
+    }
+
+    async function postToSheet(payload) {
+      if (!state.apiUrl) return null;
+      const res = await fetch(state.apiUrl, {
+        method: "POST",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const rawText = await res.text();
+      if (rawText.trim().startsWith("<")) {
+        throw new Error("Server mengirim halaman HTML (bukan JSON). Pastikan deployment Apps Script = Web app & akses = Anyone.");
+      }
+      const json = JSON.parse(rawText);
+      if (json.status !== "ok") throw new Error(json.message || "Gagal menyimpan ke Sheet");
+      if (json.data && Array.isArray(json.data.transactions)) {
+        state.transactions = json.data.transactions;
+        if (json.data.modal) state.modal = json.data.modal;
+        state.connected = true;
+      }
+      return json;
+    }
+
+    // Export CSV
+    function exportFilteredCsv() {
+      const rows = getFilteredTransactions();
+      const header = ["No", "Tanggal", "Nama Barang", "Kategori", "Jumlah", "Satuan", "Harga Satuan (Rp)", "Total (Rp)", "Toko / Pemasok", "Keterangan"];
+      const csvLines = [header.join(",")].concat(rows.map(t => {
+        const vals = [
+          t.no,
+          t.tanggal || "",
+          t.nama || "",
+          normalizeCategory(t.kategori),
+          t.jumlah ?? "",
+          t.satuan || "",
+          t.harga ?? "",
+          t.total ?? "",
+          t.toko || "",
+          t.keterangan || ""
+        ];
+        return vals.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(",");
+      }));
+      const blob = new Blob([csvLines.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Laporan-Uang-Keluar-AmanLahLek-" + getTodayIso() + ".csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Berhasil mengunduh " + rows.length + " baris ke CSV.", false);
+    }
+
+    // Modals helpers
+    function updateTxPreview() {
+      const j = parseFloat(document.getElementById("tx-jumlah").value) || 0;
+      const h = parseFloat(document.getElementById("tx-harga").value) || 0;
+      document.getElementById("tx-total-preview").textContent = formatRp(j * h);
+    }
+
+    function openTxModal(editRow) {
+      const modal = document.getElementById("modal-tx");
+      const title = document.getElementById("modal-tx-title");
+      const editInput = document.getElementById("tx-edit-row");
+
+      if (editRow) {
+        const tx = state.transactions.find(x => x.row === editRow);
+        if (!tx) return;
+        title.textContent = "Edit Pengeluaran #" + tx.no;
+        editInput.value = String(tx.row);
+        document.getElementById("tx-tanggal").value = tx.tanggal || getTodayIso();
+        document.getElementById("tx-kategori").value = normalizeCategory(tx.kategori);
+        document.getElementById("tx-nama").value = tx.nama || "";
+        document.getElementById("tx-jumlah").value = tx.jumlah ?? 1;
+        document.getElementById("tx-satuan").value = tx.satuan || "1";
+        document.getElementById("tx-harga").value = tx.harga ?? 0;
+        document.getElementById("tx-toko").value = tx.toko || "";
+        document.getElementById("tx-keterangan").value = tx.keterangan || "";
+      } else {
+        title.textContent = "Catat Pengeluaran Baru";
+        editInput.value = "";
+        document.getElementById("tx-tanggal").value = getTodayIso();
+        document.getElementById("tx-kategori").value = "BAHAN BAKU MINUMAN";
+        document.getElementById("tx-nama").value = "";
+        document.getElementById("tx-jumlah").value = "1";
+        document.getElementById("tx-satuan").value = "1";
+        document.getElementById("tx-harga").value = "";
+        document.getElementById("tx-toko").value = "";
+        document.getElementById("tx-keterangan").value = "";
+      }
+      updateTxPreview();
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeTxModal() {
+      const modal = document.getElementById("modal-tx");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function openDeleteModal(rowNum) {
+      const tx = state.transactions.find(x => x.row === rowNum);
+      if (!tx) return;
+      state.pendingDeleteRow = rowNum;
+      document.getElementById("delete-desc").textContent =
+        "Hapus #" + tx.no + " — " + tx.nama + " (" + (tx.isBundleChild ? "Termasuk Paket" : formatRp(tx.total || 0)) + ")? " +
+        (state.apiUrl ? "Perubahan ini juga akan menghapus baris pada Google Sheet." : "Perubahan diterapkan pada sesi lokal.");
+      const modal = document.getElementById("modal-delete");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeDeleteModal() {
+      state.pendingDeleteRow = null;
+      const modal = document.getElementById("modal-delete");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function openPartnerModal() {
+      document.getElementById("input-modal-abdul").value = state.modal.abdul;
+      document.getElementById("input-modal-ari").value = state.modal.ari;
+      document.getElementById("input-modal-usman").value = state.modal.usman;
+      const modal = document.getElementById("modal-partner");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closePartnerModal() {
+      const modal = document.getElementById("modal-partner");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    // Init & Event Wiring
+    document.addEventListener("DOMContentLoaded", () => {
+      state.apiUrl = loadSavedApiUrl();
+      document.getElementById("input-api-url").value = state.apiUrl;
+      document.getElementById("gas-code-preview").textContent = GAS_CODE_TEXT;
+
+      // Tab buttons
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => switchTab(btn.getAttribute("data-tab")));
+      });
+
+      document.getElementById("btn-status-pill").addEventListener("click", () => switchTab("koneksi"));
+      document.getElementById("btn-sync").addEventListener("click", () => syncFromSheet(false));
+      document.getElementById("btn-export-csv").addEventListener("click", exportFilteredCsv);
+      document.getElementById("btn-open-add").addEventListener("click", () => openTxModal(null));
+
+      // Category row click -> filter transactions
+      document.getElementById("tbody-ringkasan-kategori").addEventListener("click", e => {
+        const tr = e.target.closest("tr[data-filter-cat]");
+        if (!tr) return;
+        const cat = tr.getAttribute("data-filter-cat");
+        document.getElementById("filter-kategori").value = cat;
+        switchTab("transaksi");
+        renderTransactionsTable();
+      });
+
+      // Filters
+      ["filter-search", "filter-kategori", "filter-toko", "filter-sort", "select-limit"].forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener(id === "filter-search" ? "input" : "change", renderTransactionsTable);
+      });
+
+      document.getElementById("btn-reset-filter").addEventListener("click", () => {
+        document.getElementById("filter-search").value = "";
+        document.getElementById("filter-kategori").value = "ALL";
+        document.getElementById("filter-toko").value = "ALL";
+        document.getElementById("filter-sort").value = "no-desc";
+        document.getElementById("select-limit").value = "ALL";
+        renderTransactionsTable();
+      });
+
+      // Table Edit / Delete delegation
+      document.getElementById("tbody-transaksi").addEventListener("click", e => {
+        const editBtn = e.target.closest("button[data-edit-row]");
+        if (editBtn) {
+          openTxModal(Number(editBtn.getAttribute("data-edit-row")));
+          return;
+        }
+        const delBtn = e.target.closest("button[data-del-row]");
+        if (delBtn) {
+          openDeleteModal(Number(delBtn.getAttribute("data-del-row")));
+        }
+      });
+
+      // Tx Modal events
+      document.getElementById("btn-close-tx").addEventListener("click", closeTxModal);
+      document.getElementById("btn-cancel-tx").addEventListener("click", closeTxModal);
+      document.getElementById("tx-jumlah").addEventListener("input", updateTxPreview);
+      document.getElementById("tx-harga").addEventListener("input", updateTxPreview);
+
+      document.getElementById("form-tx").addEventListener("submit", async e => {
+        e.preventDefault();
+        const editRowVal = document.getElementById("tx-edit-row").value;
+        const payload = {
+          tanggal: document.getElementById("tx-tanggal").value,
+          kategori: document.getElementById("tx-kategori").value,
+          nama: document.getElementById("tx-nama").value.trim(),
+          jumlah: parseFloat(document.getElementById("tx-jumlah").value) || 1,
+          satuan: document.getElementById("tx-satuan").value.trim() || "1",
+          harga: parseFloat(document.getElementById("tx-harga").value) || 0,
+          toko: document.getElementById("tx-toko").value.trim(),
+          keterangan: document.getElementById("tx-keterangan").value.trim()
+        };
+        payload.total = payload.jumlah * payload.harga;
+
+        const submitBtn = document.getElementById("btn-submit-tx");
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Menyimpan...";
+
+        try {
+          if (state.apiUrl) {
+            if (editRowVal) {
+              await postToSheet(Object.assign({ action: "update", row: Number(editRowVal) }, payload));
+              showToast("Pengeluaran diperbarui di Google Sheet.", false);
+            } else {
+              await postToSheet(Object.assign({ action: "add" }, payload));
+              showToast("Pengeluaran baru ditambahkan ke Google Sheet.", false);
+            }
+          } else {
+            if (editRowVal) {
+              const idx = state.transactions.findIndex(x => x.row === Number(editRowVal));
+              if (idx >= 0) {
+                state.transactions[idx] = Object.assign({}, state.transactions[idx], payload, { isBundleChild: false });
+              }
+              showToast("Pengeluaran diperbarui (mode snapshot lokal).", false);
+            } else {
+              const maxNo = state.transactions.reduce((m, x) => Math.max(m, x.no || 0), 0);
+              const maxRow = state.transactions.reduce((m, x) => Math.max(m, x.row || 4), 4);
+              state.transactions.push(Object.assign({ row: maxRow + 1, no: maxNo + 1, isBundleChild: false }, payload));
+              showToast("Pengeluaran ditambahkan (mode snapshot lokal).", false);
+            }
+          }
+          closeTxModal();
+          renderAll();
+        } catch (err) {
+          showToast("Gagal menyimpan: " + err.message, true);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Simpan Pengeluaran";
+        }
+      });
+
+      // Delete modal events
+      document.getElementById("btn-cancel-delete").addEventListener("click", closeDeleteModal);
+      document.getElementById("btn-confirm-delete").addEventListener("click", async () => {
+        const rowNum = state.pendingDeleteRow;
+        if (!rowNum) return;
+        try {
+          if (state.apiUrl) {
+            await postToSheet({ action: "delete", row: rowNum });
+            showToast("Data dihapus dari Google Sheet.", false);
+          } else {
+            state.transactions = state.transactions.filter(x => x.row !== rowNum);
+            showToast("Data dihapus (mode snapshot lokal).", false);
+          }
+          closeDeleteModal();
+          renderAll();
+        } catch (err) {
+          showToast("Gagal menghapus: " + err.message, true);
+        }
+      });
+
+      // Partner modal events
+      document.getElementById("btn-open-modal-edit").addEventListener("click", openPartnerModal);
+      document.getElementById("btn-close-partner").addEventListener("click", closePartnerModal);
+      document.getElementById("btn-cancel-partner").addEventListener("click", closePartnerModal);
+
+      document.getElementById("form-partner").addEventListener("submit", async e => {
+        e.preventDefault();
+        const nextModal = {
+          abdul: Number(document.getElementById("input-modal-abdul").value) || 0,
+          ari: Number(document.getElementById("input-modal-ari").value) || 0,
+          usman: Number(document.getElementById("input-modal-usman").value) || 0
+        };
+        try {
+          if (state.apiUrl) {
+            await postToSheet(Object.assign({ action: "updateModal" }, nextModal));
+            showToast("Setoran modal diperbarui di Google Sheet (O6, O9, O12).", false);
+          } else {
+            state.modal = nextModal;
+            showToast("Setoran modal diperbarui (mode snapshot lokal).", false);
+          }
+          closePartnerModal();
+          renderAll();
+        } catch (err) {
+          showToast("Gagal menyimpan modal: " + err.message, true);
+        }
+      });
+
+      // Connection tab events
+      document.getElementById("btn-save-api").addEventListener("click", async () => {
+        const url = document.getElementById("input-api-url").value.trim();
+        const box = document.getElementById("api-test-result");
+        if (!url || !url.startsWith("https://")) {
+          box.className = "rounded-xl border border-rose-500/50 bg-rose-950/40 px-3.5 py-2.5 text-xs text-rose-200";
+          box.textContent = "Masukkan URL Web App Apps Script yang valid (diawali https://).";
+          return;
+        }
+        state.apiUrl = url;
+        saveApiUrl(url);
+        box.className = "rounded-xl border border-amber-500/40 bg-amber-950/30 px-3.5 py-2.5 text-xs text-amber-200";
+        box.textContent = "Menguji koneksi ke Google Sheet...";
+        const ok = await syncFromSheet(true);
+        if (ok) {
+          box.className = "rounded-xl border border-emerald-500/50 bg-emerald-950/40 px-3.5 py-2.5 text-xs text-emerald-200";
+          box.textContent = "Terhubung! Berhasil memuat " + state.transactions.length + " transaksi langsung dari Google Sheet.";
+        } else {
+          box.className = "rounded-xl border border-rose-500/50 bg-rose-950/40 px-3.5 py-2.5 text-xs text-rose-200";
+          box.textContent = "Koneksi gagal. Pastikan deployment Apps Script disetel ke Web app dengan akses Anyone.";
+        }
+      });
+
+      document.getElementById("btn-clear-api").addEventListener("click", () => {
+        state.apiUrl = "";
+        state.connected = false;
+        saveApiUrl("");
+        document.getElementById("input-api-url").value = "";
+        document.getElementById("api-test-result").classList.add("hidden");
+        state.transactions = JSON.parse(JSON.stringify(INITIAL_TRANSACTIONS));
+        state.modal = Object.assign({}, INITIAL_MODAL);
+        renderAll();
+        showToast("Kembali ke mode snapshot data Sheet.", false);
+      });
+
+      document.getElementById("btn-copy-gas").addEventListener("click", () => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(GAS_CODE_TEXT).then(() => {
+            showToast("Kode Apps Script disalin ke clipboard.", false);
+          }).catch(() => fallbackCopy(GAS_CODE_TEXT));
+        } else {
+          fallbackCopy(GAS_CODE_TEXT);
+        }
+      });
+
+      function fallbackCopy(text) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          showToast("Kode Apps Script disalin ke clipboard.", false);
+        } catch (e) {
+          showToast("Gagal menyalin otomatis. Silakan blok dan salin manual.", true);
+        }
+        document.body.removeChild(ta);
+      }
+
+      // Initial render + auto-sync if DEFAULT_API_URL or saved URL is present
+      renderAll();
+      if (state.apiUrl) {
+        syncFromSheet(true);
+      }
+    });
+  </script>
+</body>
+</html>
